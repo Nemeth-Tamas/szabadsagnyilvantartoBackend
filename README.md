@@ -31,7 +31,7 @@ Appwrite used for:
 
 ---
 
-# Project: [users](https://documenter.getpostman.com/view/10735883/2s93Y5PKYK)
+# Project: users
 
 ## End-point: http://localhost:9999/users/
 This endpoint returns all of the registered users, with their data for the client to display them.
