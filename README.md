@@ -1,3 +1,14 @@
+# Szabadság nyilvántartó BACKEND
+
+Used technologies:
+ - NodeJS
+ - ExpressJS
+ - [Appwrite](https://appwrite.io/)
+
+Appwrite used for:
+ - User management
+ - Database
+
 ## Permissions:
  - felhasznalo: 
    - request ("szabadság", "szülési szabadság", "temetési szabadság")
