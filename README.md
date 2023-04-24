@@ -11,23 +11,23 @@ Appwrite used for:
 
 ## Permissions:
  - felhasznalo: 
-   - request ("szabadság", "szülési szabadság", "temetési szabadság")
+   - request ("szabadság", "szülési szabadság", "temetési szabadság") - _felhasznalo.reqest_
  - irodavezeto:
    - everything that user can
-   - approve
-   - reject
-   - send message (to any user)
-   - list own
+   - approve - _irodavezeto.approve_
+   - reject - _irpdavezeto.reject_
+   - send message (to any user) - _irodavezeto.message_send_
+   - list own - _irodavezeto.list_own_
  - jegyzo
    - everything that irodavezeto can
-   - edit user
-   - create user
-   - delete user
-   - list all
+   - edit user - _jegyzo.edit_user_
+   - create user - _jegyzo.create_user_
+   - delete user - _jegyzo.delete_user_
+   - list all - _jegyzo.list_all_
  - hr / rendszergazda
    - everything that jegyzo can
-   - edit user permissions
-   - set user as on "apa szabadsag", "táppénz"
+   - edit user permissions - _hr.edit_user_perms_
+   - set user as on "apa szabadsag", "táppénz" - _hr.edit_user_current_state_
 
 ---
 
