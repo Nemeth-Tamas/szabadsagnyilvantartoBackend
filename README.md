@@ -12,6 +12,7 @@ Appwrite used for:
 ## Permissions:
  - felhasznalo: 
    - request ("szabadság", "szülési szabadság", "temetési szabadság") - _felhasznalo.reqest_
+   - delete request - _felhasznalo.delete_request_
  - irodavezeto:
    - everything that user can
    - approve - _irodavezeto.approve_

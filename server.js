@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const userRoute = require('./routes/userRoute');
+const kerelmekRoute = require('./routes/kerelmekRoute');
 const { Client, Databases, Users, ID } = require('node-appwrite');
 
 app.use(bodyParser.json());
@@ -21,6 +22,7 @@ const database = new Databases(client);
 const users = new Users(client);
 
 app.use(userRoute);
+app.use(kerelmekRoute);
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
