@@ -23,7 +23,7 @@ const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 
 router.get('/kerelmek/', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
             let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("managerId", submittingUser.$id)]);
             res.send({ status: "success", kerelmek });
@@ -35,7 +35,7 @@ router.get('/kerelmek/', async (req, res) => {
 
 router.get('/kerelmek/own', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", submittingUser.$id)]);
         res.send({ status: "success", kerelmek });
     } catch (error) {
@@ -45,7 +45,7 @@ router.get('/kerelmek/own', async (req, res) => {
 
 router.get('/kerelmek/all', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
             let kerelmek = await database.listDocuments(dbId, kerelmekId);
             let toReturn = [];
@@ -67,7 +67,7 @@ router.get('/kerelmek/all', async (req, res) => {
 
 router.post('/kerelmek/add', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("felhasznalo.reqest")) {
             let managerId = req.body.managerId;
             if (managerId != submittingUser.prefs.manager) {
@@ -80,6 +80,7 @@ router.post('/kerelmek/add', async (req, res) => {
                 managerId: managerId,
                 type: type,
                 dates: dates,
+                submittingUserIdentifier: submittingUser.email.split("@")[1],
             });
             res.send({ status: "success", kerelem });
         }
@@ -88,11 +89,32 @@ router.post('/kerelmek/add', async (req, res) => {
     }
 });
 
+router.get('/kerelmek/:id', async (req, res) => {
+    try {
+        let submittingUser = await users.get(req.get('submittingId'));
+        if (submittingUser.prefs.perms.includes("felhasznalo.reqest")) {
+            let kerelem = await database.getDocument(dbId, kerelmekId, req.params.id);
+            res.send({ status: "success", kerelem });
+        } else {
+            res.send({ status: "fail", error: "Permission denied" });
+        }
+    } catch (error) {
+        res.send({ status: "fail", error });
+    }
+});
+
 router.delete('/kerelmek/:id', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
-        if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
+        let submittingUser = await users.get(req.get('submittingId'));
+        if (submittingUser.prefs.perms.includes("felhasznalo.delete_request")) {
             let current = await database.getDocument(dbId, kerelmekId, req.params.id);
+            
+            let user = await users.get(current.submittingId);
+            let daysCount = current.dates.length;
+            let newPrefs = user.prefs;
+            newPrefs.remainigdays += daysCount;
+            let newUser = await users.updatePrefs(user.$id, newPrefs);
+
             if (current.szabadsagId != null) {
                 await database.deleteDocument(dbId, szabadsagID, current.szabadsagId);
             }
@@ -108,7 +130,7 @@ router.delete('/kerelmek/:id', async (req, res) => {
 
 router.put('/kerelmek/:id/approve', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
             let current = await database.getDocument(dbId, kerelmekId, req.params.id);
             let szabadsag = await database.createDocument(dbId, szabadsagID, ID.unique(), {
@@ -116,6 +138,13 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
                 dates: current.dates,
                 type: current.type
             });
+
+            let daysCount = current.dates.length;
+            let user = await users.get(current.submittingId);
+            let newPrefs = user.prefs;
+            newPrefs.remainigdays -= daysCount;
+            let newUser = await users.updatePrefs(user.$id, newPrefs);
+
             let kerelem = await database.updateDocument(dbId, kerelmekId, req.params.id, {
                 approved: true,
                 szabadsagId: szabadsag.$id
@@ -131,7 +160,7 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
 
 router.put('/kerelmek/:id/reject', async (req, res) => {
     try {
-        let submittingUser = await users.get(req.body.submittingId);
+        let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
             let kerelem = await database.updateDocument(dbId, kerelmekId, req.params.id, {
                 rejected: true,
