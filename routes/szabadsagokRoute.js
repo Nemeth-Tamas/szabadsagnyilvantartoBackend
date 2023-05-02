@@ -23,7 +23,7 @@ const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 router.get('/szabadsagok/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
-        if (submittingUser.prefs.perms.includes("felhasznalo.reqest")) {
+        if (submittingUser.prefs.perms.includes("felhasznalo.request")) {
             let szabadsagok = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", submittingUser.$id)]);
             res.send({ status: "success", szabadsagok });
         }

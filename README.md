@@ -11,7 +11,7 @@ Appwrite used for:
 
 ## Permissions:
  - felhasznalo: 
-   - request ("szabadság", "szülési szabadság", "temetési szabadság") - _felhasznalo.reqest_
+   - request ("szabadság", "szülési szabadság", "temetési szabadság") - _felhasznalo.request_
    - delete request - _felhasznalo.delete_request_
  - irodavezeto:
    - everything that user can
@@ -54,7 +54,7 @@ Appwrite used for:
     "phoneVerification": false,
     "prefs": {
         "perms": [
-            "felhasznalo.reqest",
+            "felhasznalo.request",
             "felhasznalo.delete_request",
             "felhasznalo.send",
             "irodavezeto.approve",
@@ -70,7 +70,7 @@ Appwrite used for:
         "role": "admin",
         "manager": "",
         "maxdays": 40,
-        "remainigdays": 27
+        "remainingdays": 27
     }
 },
 ```

@@ -68,21 +68,27 @@ router.get('/kerelmek/all', async (req, res) => {
 router.post('/kerelmek/add', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
-        if (submittingUser.prefs.perms.includes("felhasznalo.reqest")) {
+        if (submittingUser.prefs.perms.includes("felhasznalo.request")) {
+            console.log(req.body);
             let managerId = req.body.managerId;
             if (managerId != submittingUser.prefs.manager) {
                 res.send({ status: "fail", error: "Permission denied" });
             }
             let type = req.body.type;
             let dates = req.body.dates;
+            let name = submittingUser.name;
             let kerelem = await database.createDocument(dbId, kerelmekId, ID.unique(), {
                 submittingId: submittingUser.$id,
                 managerId: managerId,
                 type: type,
                 dates: dates,
                 submittingUserIdentifier: submittingUser.email.split("@")[1],
+                submittingName: name,
             });
             res.send({ status: "success", kerelem });
+        }
+        else {
+            res.send({ status: "fail", error: "Permission denied" });
         }
     } catch (error) {
         res.send({ status: "fail", error });
@@ -92,7 +98,7 @@ router.post('/kerelmek/add', async (req, res) => {
 router.get('/kerelmek/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
-        if (submittingUser.prefs.perms.includes("felhasznalo.reqest")) {
+        if (submittingUser.prefs.perms.includes("felhasznalo.request")) {
             let kerelem = await database.getDocument(dbId, kerelmekId, req.params.id);
             res.send({ status: "success", kerelem });
         } else {
@@ -108,15 +114,14 @@ router.delete('/kerelmek/:id', async (req, res) => {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("felhasznalo.delete_request")) {
             let current = await database.getDocument(dbId, kerelmekId, req.params.id);
-            
-            let user = await users.get(current.submittingId);
-            let daysCount = current.dates.length;
-            let newPrefs = user.prefs;
-            newPrefs.remainigdays += daysCount;
-            let newUser = await users.updatePrefs(user.$id, newPrefs);
 
             if (current.szabadsagId != null) {
                 await database.deleteDocument(dbId, szabadsagID, current.szabadsagId);
+                let user = await users.get(current.submittingId);
+                let daysCount = current.dates.length;
+                let newPrefs = user.prefs;
+                newPrefs.remainingdays += daysCount;
+                let newUser = await users.updatePrefs(user.$id, newPrefs);
             }
             let kerelem = await database.deleteDocument(dbId, kerelmekId, req.params.id);
             res.send({ status: "success", kerelem });
@@ -142,7 +147,7 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
             let daysCount = current.dates.length;
             let user = await users.get(current.submittingId);
             let newPrefs = user.prefs;
-            newPrefs.remainigdays -= daysCount;
+            newPrefs.remainingdays -= daysCount;
             let newUser = await users.updatePrefs(user.$id, newPrefs);
 
             let kerelem = await database.updateDocument(dbId, kerelmekId, req.params.id, {

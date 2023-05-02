@@ -83,7 +83,7 @@ router.post('/users/register', async (req, res) => {
         const user = await users.create(ID.unique(), req.body.email, null, req.body.password, req.body.name);
         let manager = req.body.role == "admin" ? user.$id : req.body.manager;
         let perms = req.body.role == "admin" 
-            ? ["felhasznalo.reqest", "felhasznalo.delete_request",
+            ? ["felhasznalo.request", "felhasznalo.delete_request",
                 "irodavezeto.approve", "irpdavezeto.reject", 
                 "irodavezeto.message_send", "jegyzo.edit_user", 
                 "jegyzo.create_user", "jegyzo.delete_user", "jegyzo.list_all",
@@ -120,7 +120,7 @@ router.patch('/users/:id/perms', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": req.body.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainigdays": user.prefs.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": req.body.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainingdays": user.prefs.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
@@ -138,7 +138,7 @@ router.patch('/users/:id/manager', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": req.body.manager, "maxdays": user.prefs.maxdays, "remainigdays": user.prefs.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": req.body.manager, "maxdays": user.prefs.maxdays, "remainingdays": user.prefs.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
@@ -156,7 +156,7 @@ router.patch('/users/:id/role', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": req.body.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainigdays": user.prefs.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": req.body.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainingdays": user.prefs.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
@@ -175,7 +175,7 @@ router.patch('/users/:id/maxdays', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": req.body.maxdays, "remainigdays": user.prefs.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": req.body.maxdays, "remainingdays": user.prefs.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
@@ -193,7 +193,7 @@ router.patch('/users/:id/remainingdays', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainigdays": req.body.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": user.prefs.perms, "role": user.prefs.role, "manager": user.prefs.manager, "maxdays": user.prefs.maxdays, "remainingdays": req.body.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
@@ -210,7 +210,7 @@ router.patch('/users/:id', async (req, res) => {
             res.send({status: "fail", error: "Permission denied"});
             return;
         }
-        await users.updatePrefs(req.params.id, { "perms": req.body.perms, "role": req.body.role, "manager": req.body.manager, "maxdays": req.body.maxdays, "remainigdays": req.body.remainingdays });
+        await users.updatePrefs(req.params.id, { "perms": req.body.perms, "role": req.body.role, "manager": req.body.manager, "maxdays": req.body.maxdays, "remainingdays": req.body.remainingdays });
         
         let newUser = await users.get(req.params.id);
         res.send({status: "success", newUser});
