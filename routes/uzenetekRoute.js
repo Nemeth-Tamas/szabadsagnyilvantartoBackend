@@ -22,7 +22,7 @@ const uzenetekId = process.env.APPWRITE_UZENETEK_COLLECTION;
 
 router.get('/uzenetek/:id', async (req, res) => {
     try {
-        const messages = await database.listDocuments(dbId, uzenetekId, [Query.equal("userId", req.params.id)]);
+        const messages = await database.listDocuments(dbId, uzenetekId, [Query.equal("userId", req.params.id), Query.orderDesc("$createdAt")]);
         res.send({ status: "success", messages });
     } catch (error) {
         res.send({ status: "fail", error });

@@ -25,7 +25,7 @@ router.get('/kerelmek/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
-            let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("managerId", submittingUser.$id)]);
+            let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("managerId", submittingUser.$id), Query.orderDesc("$createdAt")]);
             res.send({ status: "success", kerelmek });
         }
     } catch (error) {
@@ -36,7 +36,7 @@ router.get('/kerelmek/', async (req, res) => {
 router.get('/kerelmek/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
-        let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", submittingUser.$id)]);
+        let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", submittingUser.$id), Query.orderDesc("$createdAt")]);
         res.send({ status: "success", kerelmek });
     } catch (error) {
         res.send({ status: "fail", error });
@@ -47,7 +47,7 @@ router.get('/kerelmek/all', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
-            let kerelmek = await database.listDocuments(dbId, kerelmekId);
+            let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.orderDesc("$createdAt")]);
             let toReturn = [];
             for (let kerelem of kerelmek.documents) {
                 if (kerelem.submittingUserIdentifier == submittingUser.email.split("@")[1]) {
