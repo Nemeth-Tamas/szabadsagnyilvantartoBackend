@@ -141,7 +141,8 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
             let szabadsag = await database.createDocument(dbId, szabadsagID, ID.unique(), {
                 userId: current.submittingId,
                 dates: current.dates,
-                type: current.type
+                type: current.type,
+                managerId: current.managerId,
             });
 
             let daysCount = current.dates.length;

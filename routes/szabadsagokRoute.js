@@ -32,4 +32,23 @@ router.get('/szabadsagok/own', async (req, res) => {
     }
 });
 
+router.get('/szabadsagok/:id', async (req, res) => {
+    try {
+        let submittingUser = await users.get(req.get('submittingId'));
+        if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
+            console.log(req.params.id);
+            console.log(submittingUser.$id);
+            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id)]);
+            res.send({ status: "success", szabadsag });
+        } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
+            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id)])
+            res.send({ status: "success", szabadsag });
+        } else {
+            res.send({ status: "fail", error: "Permission denied" });
+        }
+    } catch (error) {
+        res.send({ status: "fail", error });
+    }
+});
+
 module.exports = router;

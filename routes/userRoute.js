@@ -80,7 +80,7 @@ router.post('/users/register', async (req, res) => {
         return;
     }
     try {
-        const user = await users.create(ID.unique(), req.body.email, null, req.body.password, req.body.name);
+        const user = await users.createBcryptUser(ID.unique(), req.body.email, req.body.password, req.body.name);
         let manager = req.body.role == "admin" ? user.$id : req.body.manager;
         let perms = req.body.role == "admin" 
             ? ["felhasznalo.request", "felhasznalo.delete_request",
