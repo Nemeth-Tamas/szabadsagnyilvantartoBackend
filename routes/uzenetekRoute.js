@@ -33,7 +33,7 @@ router.post('/uzenetek/create', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.message_send")) {
-            let msg = req.bodz.message;
+            let msg = req.body.message;
             let userId = req.body.userId;
             let date = req.body.date;
 
