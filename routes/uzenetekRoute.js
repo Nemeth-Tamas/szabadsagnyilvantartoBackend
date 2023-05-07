@@ -41,7 +41,7 @@ router.post('/uzenetek/create', async (req, res) => {
                 userId,
                 date,
                 message: msg,
-                sendingId: submittingUser.$id
+                sendingName: submittingUser.name
             }
 
             const message = await database.createDocument(dbId, uzenetekId, ID.unique(), data);
