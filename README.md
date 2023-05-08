@@ -9,6 +9,12 @@ Appwrite used for:
  - User management
  - Database
 
+Appwrite backup is done by placing the backup script in the same folder as the docker-compose.yml is lockated and running it in powershell with the `.\backup.ps1` command.
+
+The backup script will create a backup-{date}.tar.gz file in the same folder.
+
+To restore the backup, place the backup file in the same folder as the docker-compose.yml is lockated and run the `.\restore.ps1 backup-{date}.tar.gz` command.
+
 ## Permissions:
  - felhasznalo: 
    - request ("szabadság", "szülési szabadság", "temetési szabadság") - _felhasznalo.request_
