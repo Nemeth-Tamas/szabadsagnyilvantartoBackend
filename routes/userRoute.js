@@ -219,4 +219,58 @@ router.patch('/users/:id', async (req, res) => {
     }
 });
 
+router.patch('/users/:id/name', async (req, res) => {
+    try {
+        const user = await users.get(req.params.id);
+        let submittingId = req.get('submittingId');
+        let submittingUser = await users.get(submittingId);
+        if (!submittingUser.prefs.perms.includes("hr.edit_user_perms")) {
+            res.send({status: "fail", error: "Permission denied"});
+            return;
+        }
+        await users.updateName(req.params.id, req.body.name);
+
+        let newUser = await users.get(req.params.id);
+        res.send({status: "success", newUser});
+    } catch (error) {
+        res.send({status: "fail", error});
+    }
+});
+
+router.patch('/users/:id/password', async (req, res) => {
+    try {
+        const user = await users.get(req.params.id);
+        let submittingId = req.get('submittingId');
+        let submittingUser = await users.get(submittingId);
+        if (!submittingUser.prefs.perms.includes("hr.edit_user_perms")) {
+            res.send({status: "fail", error: "Permission denied"});
+            return;
+        }
+        await users.updatePassword(req.params.id, req.body.password);
+
+        let newUser = await users.get(req.params.id);
+        res.send({status: "success", newUser});
+    } catch (error) {
+        res.send({status: "fail", error});
+    }
+});
+
+router.patch('/users/:id/email', async (req, res) => {
+    try {
+        const user = await users.get(req.params.id);
+        let submittingId = req.get('submittingId');
+        let submittingUser = await users.get(submittingId);
+        if (!submittingUser.prefs.perms.includes("hr.edit_user_perms")) {
+            res.send({status: "fail", error: "Permission denied"});
+            return;
+        }
+        await users.updateEmail(req.params.id, req.body.email);
+
+        let newUser = await users.get(req.params.id);
+        res.send({status: "success", newUser});
+    } catch (error) {
+        res.send({status: "fail", error});
+    }
+});
+
 module.exports = router;
