@@ -120,7 +120,9 @@ router.delete('/kerelmek/:id', async (req, res) => {
                 let user = await users.get(current.submittingId);
                 let daysCount = current.dates.length;
                 let newPrefs = user.prefs;
-                newPrefs.remainingdays += daysCount;
+                if (current.type == "SZ") {
+                    newPrefs.remainingdays += daysCount;
+                }
                 let newUser = await users.updatePrefs(user.$id, newPrefs);
             }
             let kerelem = await database.deleteDocument(dbId, kerelmekId, req.params.id);
@@ -148,7 +150,9 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
             let daysCount = current.dates.length;
             let user = await users.get(current.submittingId);
             let newPrefs = user.prefs;
-            newPrefs.remainingdays -= daysCount;
+            if (current.type == "SZ") {
+                newPrefs.remainingdays -= daysCount;
+            }
             let newUser = await users.updatePrefs(user.$id, newPrefs);
 
             let kerelem = await database.updateDocument(dbId, kerelmekId, req.params.id, {
