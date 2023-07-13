@@ -91,11 +91,18 @@ router.get('/users/report', async (req, res) => {
         let toReturn = [];
         usersList.users.forEach(user => {
             let userSzabadsag = szabadsagok.find(szabadsag => szabadsag.userId == user.$id);
-            if (userSzabadsag) {
+            if (user.prefs.sick) {
+                toReturn.push({
+                    userId: user.$id,
+                    name: user.name,
+                    isSick: true
+                })
+            } else if (userSzabadsag) {
                 let userSzabadsagDates = userSzabadsag.dates;
                 toReturn.push({
                     userId: user.$id,
                     name: user.name,
+                    isSick: false,
                     dates: userSzabadsagDates.join(", ")
                 });
             }
