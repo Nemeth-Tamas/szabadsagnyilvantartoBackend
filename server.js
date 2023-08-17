@@ -8,7 +8,7 @@ const userRoute = require('./routes/userRoute');
 const kerelmekRoute = require('./routes/kerelmekRoute');
 const szabadsagokRoute = require('./routes/szabadsagokRoute');
 const uzenetekRoute = require('./routes/uzenetekRoute');
-const { Client, Databases, Users } = require('node-appwrite');
+const { Client } = require('node-appwrite');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
