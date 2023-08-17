@@ -8,7 +8,7 @@ const userRoute = require('./routes/userRoute');
 const kerelmekRoute = require('./routes/kerelmekRoute');
 const szabadsagokRoute = require('./routes/szabadsagokRoute');
 const uzenetekRoute = require('./routes/uzenetekRoute');
-const { Client, Databases, Users, ID } = require('node-appwrite');
+const { Client, Databases, Users } = require('node-appwrite');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,9 +19,6 @@ client
     .setEndpoint(process.env.APPWRITE_API_ENDPOINT)
     .setProject(process.env.APPWRITE_PROJECT_ID)
     .setKey(process.env.APPWRITE_API_KEY);
-
-const database = new Databases(client);
-const users = new Users(client);
 
 app.use(userRoute);
 app.use(kerelmekRoute);
