@@ -20,6 +20,7 @@ const users = new Users(client);
 const dbId = process.env.APPWRITE_DB_ID;
 const kerelmekId = process.env.APPWRITE_KERELMEK_COLLECTION;
 const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
+const plansID = process.env.APPWRITE_PLANS_COLLECTION;
 
 router.get('/users/', async (req, res) => {
     try {
@@ -216,6 +217,14 @@ router.post('/users/register', async (req, res) => {
             : req.body.perms;
         let preferences = { "perms": perms, "manager": manager, "role": req.body.role, "maxdays": req.body.maxdays, "remainingdays": req.body.remainingdays, "sick": false };
         const prefs = await users.updatePrefs(user.$id, preferences);
+
+        // Creating plan entry for user
+        await database.createDocument(dbId, plansID, ID.unique(), {
+            userId: user.$id,
+            managerId: user.prefs.manager,
+            filledOut: false,
+        });
+
         res.send({ status: "success", user, prefs });
     } catch (error) {
         res.send({ status: "fail", error });
