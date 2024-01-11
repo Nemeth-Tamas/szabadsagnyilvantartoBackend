@@ -3,6 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Client, Databases, Users, ID, Query } = require('node-appwrite');
+const createExcel = require("../util/planToExcel");
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -22,9 +23,26 @@ const plansID = process.env.APPWRITE_PLANS_COLLECTION;
 
 router.get('/plans/:id', async (req, res) => {
     try {
-        // let submittingUser = await users.get(req.get('submittingId'));
+        let submittingUser = await users.get(req.get('submittingId'));
         let plan = (await database.listDocuments(dbId, plansID, [Query.equal("userId", req.params.id)])).documents[0];
-        res.send({ status: "success", plan, filledOut: plan.filledOut });
+        if (plan == undefined) {
+            let userFromId = await users.get(req.params.id);
+            if (userFromId != undefined) {
+                let planDoc = await database.createDocument(dbId, plansID, ID.unique(), {
+                    userId: req.params.id,
+                    managerId: userFromId.prefs.manager,
+                    dates: [],
+                    filledOut: false,
+                });
+                plan = planDoc.$id;
+            } else {
+                res.send({ status: "fail", error: "User does not exist" });
+                return;
+            }
+        }
+        if (submittingUser.prefs.perms.includes("hr.edit_user_current_state") || submittingUser.$id == req.params.id) {
+            res.send({ status: "success", plan, filledOut: plan.filledOut });
+        }
     } catch (error) {
         res.send({ status: "fail", error });
     }
@@ -47,13 +65,36 @@ router.post('/plans/', async (req, res) => {
             return;
         } else if (submittingUser.prefs.maxdays == plan.length) {
             filledOut = true;
-            let docId = (await database.listDocuments(dbId, plansID, [Query.equal("userId", id)]))?.documents[0]?.$id;
-            let planDoc = await database.updateDocument(dbId, plansID, docId, {
-                dates: plan,
-                filledOut: filledOut,
-            })
-            res.send({ status: "success", planDoc });
-            return;
+            let doc = (await database.listDocuments(dbId, plansID, [Query.equal("userId", id)]))?.documents[0];
+            if (doc == undefined) {
+                let userFromId = await users.get(id);
+                if (userFromId != undefined) {
+                    let planDoc = await database.createDocument(dbId, plansID, ID.unique(), {
+                        userId: id,
+                        managerId: userFromId.prefs.manager,
+                        dates: plan,
+                        filledOut: filledOut,
+                    });
+                    res.send({ status: "success", planDoc });
+                    return;
+                } else {
+                    res.send({ status: "fail", error: "User does not exist" });
+                    return;
+                }
+            } else {
+                if (doc.filledOut) {
+                    res.send({ status: "fail", error: "Plan already filled out" });
+                    return;
+                } {
+                    let docId = doc?.$id;
+                    let planDoc = await database.updateDocument(dbId, plansID, docId, {
+                        dates: plan,
+                        filledOut: filledOut,
+                    })
+                    res.send({ status: "success", planDoc });
+                    return;
+                }
+            }
         } else if (submittingUser.prefs.maxdays > plan.length) {
             res.send({ status: "fail", error: "Did not use all days" });
             return;
@@ -86,8 +127,32 @@ router.delete('/plans/:id', async (req, res) => {
     }
 });
 
-// TODO: Implement get request that only hr can call to get a user's plans in excel format.
+router.get('/plans/:id/excel', async (req, res) => {
+    console.log("excel");
+    try {
+        const submittingUser = await users.get(req.get('submittingId'));
+        const user = await users.get(req.params.id);
+        console.log(submittingUser);
+        if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
+            let uId = req.params.id;
+            let doc = (await database.listDocuments(dbId, plansID, [Query.equal("userId", uId)]))?.documents[0];
+            createExcel(doc, user?.name).then((data) => {
+                console.log("excel created");
+                // send back the excel file from the buffer
+                // set the content type to excel
+                res.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                res.send(data);
+            }).catch((error) => {
+                res.send({ status: "fail", error });
+            });
+        } else {
+            res.send({ status: "fail", error: "Permission denied" });
+        }
+    } catch (error) {
+        res.send({ status: "fail", error });
+    }
+});
+
 // TODO: Implement request that only hr can call to reset all users' plans. This will get called once a year.
-// TODO: Implement request that only hr can call to reset ONE user's plans.
 
 module.exports = router;
