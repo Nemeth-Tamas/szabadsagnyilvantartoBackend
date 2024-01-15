@@ -107,17 +107,59 @@ router.post('/plans/', async (req, res) => {
     }
 });
 
+const resetUserPlan = async (id) => {
+    let doc = (await database.listDocuments(dbId, plansID, [Query.equal("userId", id)]))?.documents[0];
+    if (doc == undefined) {
+        let userFromId = await users.get(id);
+        if (userFromId != undefined) {
+            let planDoc = await database.createDocument(dbId, plansID, ID.unique(), {
+                userId: id,
+                managerId: userFromId.prefs.manager,
+                dates: [],
+                filledOut: false,
+            });
+            return planDoc;
+        } else {
+            return undefined;
+        }
+    } else {
+        let docId = doc?.$id;
+        let planDoc = await database.updateDocument(dbId, plansID, docId, {
+            dates: [],
+            filledOut: false,
+        })
+        return planDoc;
+    }
+
+}
+
+// reset can only run in january
+router.delete('/plans/reset', async (req, res) => {
+    try {
+        const submittingUser = await users.get(req.get('submittingId'));
+        if (submittingUser.prefs.perms.includes("hr.edit_user_current_state") && (new Date().getMonth() == 0)) {
+            let users = await database.listDocuments(dbId, plansID);
+            for (const element of users.documents) {
+                let uId = element.userId;
+                resetUserPlan(uId);
+            }
+            res.send({ status: "success" });
+        }
+    } catch (error) {
+        res.send({ status: "fail", error });
+    }
+});
+
 router.delete('/plans/:id', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
             let uId = req.params.id;
-            let docId = (await database.listDocuments(dbId, plansID, [Query.equal("userId", uId)]))?.documents[0]?.$id;
-            let planDoc = await database.updateDocument(dbId, plansID, docId, {
-                dates: [],
-                filledOut: false,
-            })
-            res.send({ status: "success", planDoc });
+            resetUserPlan(uId).then((planDoc) => {
+                res.send({ status: "success", planDoc });
+            }).catch((error) => {
+                res.send({ status: "fail", error });
+            });
         } else {
             res.send({ status: "fail", error: "Permission denied" });
         }
@@ -136,6 +178,17 @@ router.get('/plans/:id/excel', async (req, res) => {
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
             let uId = req.params.id;
             let doc = (await database.listDocuments(dbId, plansID, [Query.equal("userId", uId)]))?.documents[0];
+            if (doc == undefined) {
+                let userFromId = await users.get(req.params.id);
+                if (userFromId != undefined) {
+                    doc = await database.createDocument(dbId, plansID, ID.unique(), {
+                        userId: req.params.id,
+                        managerId: userFromId.prefs.manager,
+                        dates: [],
+                        filledOut: false,
+                    });
+                }
+            }
             createExcel(doc, user?.name).then((data) => {
                 console.log("excel created");
                 // send back the excel file from the buffer
@@ -152,7 +205,5 @@ router.get('/plans/:id/excel', async (req, res) => {
         res.send({ status: "fail", error });
     }
 });
-
-// TODO: Implement request that only hr can call to reset all users' plans. This will get called once a year.
 
 module.exports = router;
