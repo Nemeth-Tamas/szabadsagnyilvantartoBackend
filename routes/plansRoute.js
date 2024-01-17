@@ -56,12 +56,12 @@ router.post('/plans/', async (req, res) => {
 
         let submittingUser = await users.get(id);
         if (plan.length == 0) {
-            res.send({ status: "fail", error: "Plan is empty" });
+            res.send({ status: "fail", error: "Plan is empty", errorCode: "emptyPlan" });
             return;
         }
 
         if (submittingUser.prefs.maxdays == 0) {
-            res.send({ status: "fail", error: "HR did not set the number of days yet" });
+            res.send({ status: "fail", error: "HR did not set the number of days yet", errorCode: "noDaysSet" });
             return;
         } else if (submittingUser.prefs.maxdays == plan.length) {
             filledOut = true;
@@ -96,10 +96,10 @@ router.post('/plans/', async (req, res) => {
                 }
             }
         } else if (submittingUser.prefs.maxdays > plan.length) {
-            res.send({ status: "fail", error: "Did not use all days" });
+            res.send({ status: "fail", error: "Did not use all days", errorCode: "notAllDaysUsed" });
             return;
         } else if (submittingUser.prefs.maxdays < plan.length) {
-            res.send({ status: "fail", error: "Used too many days" });
+            res.send({ status: "fail", error: "Used too many days", errorCode: "tooManyDaysUsed" });
             return;
         }
     } catch (error) {
