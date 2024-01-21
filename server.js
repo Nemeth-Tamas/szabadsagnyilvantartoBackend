@@ -9,6 +9,7 @@ const kerelmekRoute = require('./routes/kerelmekRoute');
 const szabadsagokRoute = require('./routes/szabadsagokRoute');
 const uzenetekRoute = require('./routes/uzenetekRoute');
 const plansRoute = require('./routes/plansRoute');
+const tappenzRoute = require('./routes/tappenzRoute');
 const { Client } = require('node-appwrite');
 
 app.use(bodyParser.json());
@@ -26,6 +27,7 @@ app.use(kerelmekRoute);
 app.use(szabadsagokRoute);
 app.use(uzenetekRoute);
 app.use(plansRoute);
+app.use(tappenzRoute);
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)

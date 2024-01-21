@@ -21,6 +21,7 @@ const dbId = process.env.APPWRITE_DB_ID;
 const kerelmekId = process.env.APPWRITE_KERELMEK_COLLECTION;
 const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 const plansID = process.env.APPWRITE_PLANS_COLLECTION;
+const tappenzID = process.env.APPWRITE_TAPPENZ_COLLECTION;
 
 router.get('/users/', async (req, res) => {
     try {
@@ -30,6 +31,13 @@ router.get('/users/', async (req, res) => {
             let toReturn = [];
             for (let user of usersList.users) {
                 if (user.email.endsWith(submittingUser.email.split("@")[1])) {
+                    // check tappenz
+                    let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
+                    if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
+                        user.prefs.sick = true;
+                    } else {
+                        user.prefs.sick = false;
+                    }
                     toReturn.push(user);
                 }
             }
@@ -38,6 +46,15 @@ router.get('/users/', async (req, res) => {
         } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
             const usersList = await users.list();
             usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingUser.$id));
+            for (let user of usersList.users) {
+                // check tappenz
+                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
+                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
+                    user.prefs.sick = true;
+                } else {
+                    user.prefs.sick = false;
+                }
+            }
             res.send({ status: "success", usersList });
         } else {
             res.send({ status: "fail", error: "Permission denied" });
@@ -174,6 +191,12 @@ router.get('/users/:id', async (req, res) => {
         if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
             const user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1])) {
+                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
+                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
+                    user.prefs.sick = true;
+                } else {
+                    user.prefs.sick = false;
+                }
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });
@@ -181,6 +204,12 @@ router.get('/users/:id', async (req, res) => {
         } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
             const user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1]) && user.prefs.manager.includes(submittingUser.$id)) {
+                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
+                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
+                    user.prefs.sick = true;
+                } else {
+                    user.prefs.sick = false;
+                }
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });
@@ -419,6 +448,8 @@ router.patch('/users/:id/email', async (req, res) => {
     }
 });
 
+// TODO: remove this route
+// TODO: remote sick param from user prefs
 router.patch('/users/:id/sick', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
