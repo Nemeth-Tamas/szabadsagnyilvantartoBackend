@@ -72,7 +72,9 @@ router.post('/kerelmek/add', async (req, res) => {
             console.log(req.body);
             let managerId = req.body.managerId;
             if (managerId != submittingUser.prefs.manager) {
+                console.log("Permission denied");
                 res.send({ status: "fail", error: "Permission denied" });
+                return;
             }
             let type = req.body.type;
             let dates = req.body.dates;
@@ -86,12 +88,15 @@ router.post('/kerelmek/add', async (req, res) => {
                 submittingName: name,
             });
             res.send({ status: "success", kerelem });
+            return;
         }
         else {
             res.send({ status: "fail", error: "Permission denied" });
+            return;
         }
     } catch (error) {
         res.send({ status: "fail", error });
+        return;
     }
 });
 

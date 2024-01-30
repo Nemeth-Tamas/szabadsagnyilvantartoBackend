@@ -3,6 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Client, Databases, Users, ID, Query } = require('node-appwrite');
+const { isSick } = require('../util/sickDayCalc');
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -33,11 +34,7 @@ router.get('/users/', async (req, res) => {
                 if (user.email.endsWith(submittingUser.email.split("@")[1])) {
                     // check tappenz
                     let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                    if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
-                        user.prefs.sick = true;
-                    } else {
-                        user.prefs.sick = false;
-                    }
+                    user.prefs.sick = isSick(tappenz);
                     toReturn.push(user);
                 }
             }
@@ -49,11 +46,7 @@ router.get('/users/', async (req, res) => {
             for (let user of usersList.users) {
                 // check tappenz
                 let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
-                    user.prefs.sick = true;
-                } else {
-                    user.prefs.sick = false;
-                }
+                user.prefs.sick = isSick(tappenz);
             }
             res.send({ status: "success", usersList });
         } else {
@@ -66,6 +59,7 @@ router.get('/users/', async (req, res) => {
 
 router.get('/users/report', async (req, res) => {
     try {
+        console.log(req.get('submittingId'));
         let usersList;
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
@@ -105,30 +99,45 @@ router.get('/users/report', async (req, res) => {
             return false;
         });
 
+
         // return a csv file with the user id user name and dates of leave. Only return the users that are on leave today
-        let toReturn = [];
-        usersList.users.forEach(user => {
-            let userSzabadsag = szabadsagok.find(szabadsag => szabadsag.userId == user.$id);
-            if (user.prefs.sick) {
-                toReturn.push({
-                    userId: user.$id,
-                    name: user.name,
-                    isSick: true
-                })
-            } else if (userSzabadsag) {
-                let userSzabadsagDates = userSzabadsag.dates;
-                toReturn.push({
-                    userId: user.$id,
-                    name: user.name,
-                    isSick: false,
-                    dates: userSzabadsagDates.join(", ")
+        
+
+        const calculateReturn = () => {
+            return new Promise(async (resolve, reject) => {
+                let toReturn = [];
+                let promises = usersList.users.map((user) => {
+                    let userSzabadsag = szabadsagok.find(szabadsag => szabadsag.userId == user.$id);
+                    return database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])
+                        .then((tappenzek) => {
+                            let tappenz = tappenzek.documents[0];
+                            if (isSick(tappenz)) {
+                                toReturn.push({
+                                    userId: user.$id,
+                                    name: user.name,
+                                    isSick: true
+                                })
+                                console.log("To return right after adding user!", toReturn);
+                            } else if (userSzabadsag) {
+                                let userSzabadsagDates = userSzabadsag.dates;
+                                toReturn.push({
+                                    userId: user.$id,
+                                    name: user.name,
+                                    isSick: false,
+                                    dates: userSzabadsagDates.join(", ")
+                                });
+                            }
+                        })
                 });
-            }
-        });
-
-
-
-        res.send({ status: "success", report: toReturn });
+                await Promise.all(promises);
+                console.log("To return at the end!", toReturn);
+                resolve(toReturn);
+            })
+        }
+        
+        let ret = await calculateReturn();
+        console.log("ret", ret);
+        res.send({ status: "success", report: ret });
     } catch (error) {
         res.send({ status: "fail", error });
     }
@@ -192,11 +201,7 @@ router.get('/users/:id', async (req, res) => {
             const user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1])) {
                 let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
-                    user.prefs.sick = true;
-                } else {
-                    user.prefs.sick = false;
-                }
+                user.prefs.sick = isSick(tappenz);
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });
@@ -205,11 +210,7 @@ router.get('/users/:id', async (req, res) => {
             const user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1]) && user.prefs.manager.includes(submittingUser.$id)) {
                 let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                if (tappenz != undefined && tappenz.endDate == null && new Date(tappenz.startDate) < new Date()) {
-                    user.prefs.sick = true;
-                } else {
-                    user.prefs.sick = false;
-                }
+                user.prefs.sick = isSick(tappenz);
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });
