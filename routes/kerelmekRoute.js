@@ -3,6 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Client, Databases, Users, ID, Query } = require('node-appwrite');
+const { sendEmail } = require('../util/email');
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -20,6 +21,35 @@ const users = new Users(client);
 const dbId = process.env.APPWRITE_DB_ID;
 const kerelmekId = process.env.APPWRITE_KERELMEK_COLLECTION;
 const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
+
+async function checkManagerAndSendEmail(managerId, name, dates) {
+    // Check if the users manager is on leave currently
+    let manager = await users.get(managerId);
+    let today = new Date();
+    today = today.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
+
+    let twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+    twoWeeksAgo = twoWeeksAgo.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
+
+    let twoWeeksLater = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    twoWeeksLater = twoWeeksLater.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
+    
+    let managerLeaves = await database.listDocuments(dbId, szabadsagID, [
+        Query.equal("userId", manager.$id)
+    ]);
+    
+    let relevantLeaves = managerLeaves.documents.filter(leave => {
+        return leave.dates.some(date => date >= twoWeeksAgo && date <= twoWeeksLater);
+    });
+
+    let managerOnLeaveToday = relevantLeaves.some(leave => leave.dates.includes(today));
+
+    if (managerOnLeaveToday) {
+        let subject = "Kérelem érkezett";
+        let text = `${name} a következő időpontokra kért szabadságot: ${dates.join(", ")}.\n\nKérem, hogy a kérelmet mielőbb vizsgálja át.`;
+        sendEmail(subject, text);
+    }
+}
 
 router.get('/kerelmek/', async (req, res) => {
     try {
@@ -87,6 +117,9 @@ router.post('/kerelmek/add', async (req, res) => {
                 submittingUserIdentifier: submittingUser.email.split("@")[1],
                 submittingName: name,
             });
+
+            checkManagerAndSendEmail(managerId, name, dates);
+
             res.send({ status: "success", kerelem });
             return;
         }
