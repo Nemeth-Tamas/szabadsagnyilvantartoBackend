@@ -3,7 +3,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Client, Databases, Users, ID, Query } = require('node-appwrite');
-const { isSick } = require('../util/sickDayCalc');
+const { isSick, isOnLeave } = require('../util/sickDayCalc');
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -24,6 +24,15 @@ const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 const plansID = process.env.APPWRITE_PLANS_COLLECTION;
 const tappenzID = process.env.APPWRITE_TAPPENZ_COLLECTION;
 
+async function checkStatus(user) {
+    // check tappenz and if on leave
+    let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
+    user.prefs.sick = isSick(tappenz);
+    let szabadsagok = (await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", user.$id)])).documents;
+    user.prefs.onLeave = await isOnLeave(szabadsagok);
+    return user;
+}
+
 router.get('/users/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -32,10 +41,7 @@ router.get('/users/', async (req, res) => {
             let toReturn = [];
             for (let user of usersList.users) {
                 if (user.email.endsWith(submittingUser.email.split("@")[1])) {
-                    // check tappenz
-                    let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                    user.prefs.sick = isSick(tappenz);
-                    toReturn.push(user);
+                    toReturn.push(await checkStatus(user));
                 }
             }
             usersList.users = toReturn;
@@ -44,9 +50,7 @@ router.get('/users/', async (req, res) => {
             const usersList = await users.list();
             usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingUser.$id));
             for (let user of usersList.users) {
-                // check tappenz
-                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                user.prefs.sick = isSick(tappenz);
+                user = await checkStatus(user);
             }
             res.send({ status: "success", usersList });
         } else {
@@ -57,160 +61,21 @@ router.get('/users/', async (req, res) => {
     }
 });
 
-router.get('/users/report', async (req, res) => {
-    try {
-        console.log(req.get('submittingId'));
-        let usersList;
-        let submittingUser = await users.get(req.get('submittingId'));
-        if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
-            usersList = await users.list();
-            let toReturn = [];
-            for (let user of usersList.users) {
-                if (user.email.endsWith(submittingUser.email.split("@")[1])) {
-                    toReturn.push(user);
-                }
-            }
-            usersList.users = toReturn;
-        } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
-            usersList = await users.list();
-            usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingUser.$id));
-        } else {
-            res.send({ status: "fail", error: "Permission denied" });
-        }
-
-        let today = new Date();
-        if (today.getMonth() < 10) {
-            today.setMonth(today.getMonth());
-            today = new Date(today.getTime() - 1);
-        }
-        if (today.getDate() < 10) {
-            today.setDate(today.getDate() + 1);
-            today = new Date(today.getTime() - 1);
-        }
-
-        let todayString = today.toISOString().split('T')[0];
-
-        let szabadsagok = await database.listDocuments(dbId, szabadsagID, []);
-
-        szabadsagok = szabadsagok.documents.filter(szabadsag => {
-            if (szabadsag.dates.includes(todayString)) {
-                return true;
-            }
-            return false;
-        });
-
-
-        // return a csv file with the user id user name and dates of leave. Only return the users that are on leave today
-        
-
-        const calculateReturn = () => {
-            return new Promise(async (resolve, reject) => {
-                let toReturn = [];
-                let promises = usersList.users.map((user) => {
-                    let userSzabadsag = szabadsagok.find(szabadsag => szabadsag.userId == user.$id);
-                    return database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])
-                        .then((tappenzek) => {
-                            let tappenz = tappenzek.documents[0];
-                            if (isSick(tappenz)) {
-                                toReturn.push({
-                                    userId: user.$id,
-                                    name: user.name,
-                                    isSick: true
-                                })
-                                console.log("To return right after adding user!", toReturn);
-                            } else if (userSzabadsag) {
-                                let userSzabadsagDates = userSzabadsag.dates;
-                                toReturn.push({
-                                    userId: user.$id,
-                                    name: user.name,
-                                    isSick: false,
-                                    dates: userSzabadsagDates.join(", ")
-                                });
-                            }
-                        })
-                });
-                await Promise.all(promises);
-                console.log("To return at the end!", toReturn);
-                resolve(toReturn);
-            })
-        }
-        
-        let ret = await calculateReturn();
-        console.log("ret", ret);
-        res.send({ status: "success", report: ret });
-    } catch (error) {
-        res.send({ status: "fail", error });
-    }
-
-
-
-
-
-
-    // const usersList = await users.list();
-    // const szabadsagList = await szabadsag.list();
-
-    // const filteredUsers = usersList.users.filter(user => {
-    //     if (userId && user._id !== userId) {
-    //         return false;
-    //     }
-    //     const szabadsagUser = szabadsagList.szabadsagok.find(szabadsag => szabadsag.user_id === user._id.toString());
-    //     if (!szabadsagUser) {
-    //         return false;
-    //     }
-    //     const szabadsagDays = szabadsagUser.szabadsagok.reduce((acc, szabadsag) => {
-    //         if (szabadsag.kezdes >= startDate && szabadsag.vege <= endDate) {
-    //             return acc + szabadsag.napok;
-    //         }
-    //         return acc;
-    //     }, 0);
-    //     return szabadsagDays > 0;
-    // });
-
-    // const csvData = filteredUsers.map(user => {
-    //     const szabadsagUser = szabadsagList.szabadsagok.find(szabadsag => szabadsag.user_id === user._id.toString());
-    //     const szabadsagDays = szabadsagUser.szabadsagok.reduce((acc, szabadsag) => {
-    //         if (szabadsag.kezdes >= startDate && szabadsag.vege <= endDate) {
-    //             return acc + szabadsag.napok;
-    //         }
-    //         return acc;
-    //     }, 0);
-    //     return {
-    //         id: user._id,
-    //         name: user.name,
-    //         days: szabadsagDays
-    //     };
-    // });
-
-    // const csvStringifier = csv({
-    //     header: true,
-    //     columns: ['id', 'name', 'days']
-    // });
-
-    // res.setHeader('Content-Disposition', 'attachment; filename=report.csv');
-    // res.setHeader('Content-Type', 'text/csv');
-    // csvStringifier.pipe(res);
-    // csvData.forEach(data => csvStringifier.write(data));
-    // csvStringifier.end();
-});
-
 router.get('/users/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
-            const user = await users.get(req.params.id);
+            let user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1])) {
-                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                user.prefs.sick = isSick(tappenz);
+                user = await checkStatus(user);
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });
             }
         } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
-            const user = await users.get(req.params.id);
+            let user = await users.get(req.params.id);
             if (user.email.endsWith(submittingUser.email.split("@")[1]) && user.prefs.manager.includes(submittingUser.$id)) {
-                let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
-                user.prefs.sick = isSick(tappenz);
+                user = await checkStatus(user);
                 res.send({ status: "success", user });
             } else {
                 res.send({ status: "fail", error: "Permission denied" });

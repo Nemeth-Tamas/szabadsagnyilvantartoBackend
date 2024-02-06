@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Client, Databases, Users, ID, Query } = require('node-appwrite');
 const { sendEmail } = require('../util/email');
+const { isOnLeave } = require('../util/sickDayCalc');
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -25,24 +26,9 @@ const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 async function checkManagerAndSendEmail(managerId, name, dates) {
     // Check if the users manager is on leave currently
     let manager = await users.get(managerId);
-    let today = new Date();
-    today = today.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
+    let managersLeaves = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", manager.$id)]);
 
-    let twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    twoWeeksAgo = twoWeeksAgo.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
-
-    let twoWeeksLater = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-    twoWeeksLater = twoWeeksLater.toISOString().split('T')[0]; // get date in YYYY-MM-DD format
-    
-    let managerLeaves = await database.listDocuments(dbId, szabadsagID, [
-        Query.equal("userId", manager.$id)
-    ]);
-    
-    let relevantLeaves = managerLeaves.documents.filter(leave => {
-        return leave.dates.some(date => date >= twoWeeksAgo && date <= twoWeeksLater);
-    });
-
-    let managerOnLeaveToday = relevantLeaves.some(leave => leave.dates.includes(today));
+    let managerOnLeaveToday = await isOnLeave(managersLeaves.documents);
 
     if (managerOnLeaveToday) {
         let subject = "Kérelem érkezett";

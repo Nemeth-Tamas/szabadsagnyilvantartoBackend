@@ -76,7 +76,8 @@ To restore the backup, place the backup file in the same folder as the docker-co
         "role": "admin",
         "manager": "",
         "maxdays": 40,
-        "remainingdays": 27
+        "remainingdays": 27,
+        "sick": false
     }
 },
 ```
