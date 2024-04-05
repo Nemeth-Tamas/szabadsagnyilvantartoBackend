@@ -116,7 +116,7 @@ router.post('/users/register', async (req, res) => {
         // Creating plan entry for user
         await database.createDocument(dbId, plansID, ID.unique(), {
             userId: user.$id,
-            managerId: user.prefs.manager,
+            managerId: prefs.manager,
             filledOut: false,
         });
 
