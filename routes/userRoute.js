@@ -146,6 +146,11 @@ router.delete('/users/:id', async (req, res) => {
         for (let szabadsag of szabadsagok.documents) {
             await database.deleteDocument(dbId, szabadsagID, szabadsag.$id);
         }
+
+        const plans = await database.listDocuments(dbId, plansID, [Query.equal("userId", req.params.id)]);
+        for (let plan of plans.documents) {
+            await database.deleteDocument(dbId, plansID, plan.$id);
+        }
         res.send({ status: "success", user });
     } catch (error) {
         res.send({ status: "fail", error });
