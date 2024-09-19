@@ -33,6 +33,33 @@ async function checkStatus(user) {
     return user;
 }
 
+/**
+ * @openapi
+ * /users/:
+ *  get:
+ *      summary: Retrieve a list of users based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of users or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      usersList:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get('/users/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -61,6 +88,38 @@ router.get('/users/', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}:
+ *  get:
+ *      summary: Retrieve a user by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      user:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get('/users/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -88,6 +147,60 @@ router.get('/users/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/register:
+ *  post:
+ *      summary: Register a new user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          email:
+ *                              type: string
+ *                          password:
+ *                              type: string
+ *                              description: The password should be bcrypt hashed already
+ *                          name:
+ *                              type: string
+ *                          role:
+ *                              type: string
+ *                          manager:
+ *                              type: string
+ *                          perms:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *                          maxdays:
+ *                              type: integer
+ *                          remainingdays:
+ *                              type: integer
+ *      responses:
+ *         200:
+ *            description: Returns a status, a user, and preferences or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      user:
+ *                          $ref: '#/components/schemas/User'
+ *                      prefs:
+ *                          type: object
+ *                          description: The preferences of the user
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.post('/users/register', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
@@ -126,6 +239,38 @@ router.post('/users/register', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}:
+ *  delete:
+ *      summary: Delete a user by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user to delete
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      user:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.delete('/users/:id', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
@@ -157,6 +302,49 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/perms:
+ *  patch:
+ *      summary: Update a user's permissions by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose permissions to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          perms:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/perms', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -175,6 +363,47 @@ router.patch('/users/:id/perms', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/manager:
+ *  patch:
+ *      summary: Update a user's manager by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose manager to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          manager:
+ *                              type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/manager', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -193,6 +422,47 @@ router.patch('/users/:id/manager', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/role:
+ *  patch:
+ *      summary: Update a user's role by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose role to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          role:
+ *                              type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/role', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -211,7 +481,47 @@ router.patch('/users/:id/role', async (req, res) => {
     }
 });
 
-
+/**
+ * @openapi
+ * /users/{id}/maxdays:
+ *  patch:
+ *      summary: Update a user's maxdays by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose maxdays to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          maxdays:
+ *                              type: integer
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/maxdays', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -230,6 +540,47 @@ router.patch('/users/:id/maxdays', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/remainingdays:
+ *  patch:
+ *      summary: Update a user's remainingdays by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose remainingdays to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          remainingdays:
+ *                              type: integer
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/remainingdays', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -247,6 +598,58 @@ router.patch('/users/:id/remainingdays', async (req, res) => {
         res.send({ status: "fail", error });
     }
 });
+
+/**
+ * @openapi
+ * /users/{id}:
+ *  patch:
+ *      summary: Update a user's preferences by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose preferences to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          perms:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *                          role:
+ *                              type: string
+ *                          manager:
+ *                              type: string
+ *                          maxdays:
+ *                              type: integer
+ *                          remainingdays:
+ *                              type: integer
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -265,6 +668,47 @@ router.patch('/users/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/name:
+ *  patch:
+ *      summary: Update a user's name by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose name to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          name:
+ *                              type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/name', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -283,6 +727,48 @@ router.patch('/users/:id/name', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/password:
+ *  patch:
+ *      summary: Update a user's password by ID based on the permissions of the submitting user
+ *      description: The password needs to be plaintext here because of appwrites limitation, so this endpoint should not be used
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose password to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          password:
+ *                              type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/password', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -301,6 +787,47 @@ router.patch('/users/:id/password', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /users/{id}/email:
+ *  patch:
+ *      summary: Update a user's email by ID based on the permissions of the submitting user
+ *      tags: [Users]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose email to update
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          email:
+ *                              type: string
+ *      responses:
+ *         200:
+ *            description: Returns a status and a user or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      newUser:
+ *                          $ref: '#/components/schemas/User'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.patch('/users/:id/email', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -319,8 +846,6 @@ router.patch('/users/:id/email', async (req, res) => {
     }
 });
 
-// TODO: remove this route
-// TODO: remote sick param from user prefs
 router.patch('/users/:id/sick', async (req, res) => {
     try {
         const user = await users.get(req.params.id);
@@ -340,3 +865,37 @@ router.patch('/users/:id/sick', async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *      User:
+ *          type: object
+ *          properties:
+ *              $id: 
+ *                  type: string
+ *              name:
+ *                  type: string
+ *              password:
+ *                  type: string
+ *              email:
+ *                  type: string
+ *              prefs:
+ *                  type: object
+ *                  properties:
+ *                      perms:
+ *                          type: array
+ *                          items:
+ *                              type: string
+ *                      role:
+ *                          type: string
+ *                      manager:
+ *                          type: string
+ *                      maxdays:
+ *                          type: number
+ *                      remainingdays:
+ *                          type: number
+ *                      sick:
+ *                          type: boolean
+ */

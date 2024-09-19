@@ -21,6 +21,38 @@ const users = new Users(client);
 const dbId = process.env.APPWRITE_DB_ID;
 const plansID = process.env.APPWRITE_PLANS_COLLECTION;
 
+/**
+ * @openapi
+ * /plans/{id}:
+ *  get:
+ *      summary: Retrieve a plan by ID
+ *      tags: [Plans]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the plan to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a plan or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      plan:
+ *                          $ref: '#/components/schemas/Plan'
+ *                      filledOut:
+ *                          type: boolean
+ *                          description: Whether the plan is filled out or not
+ */
 router.get('/plans/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -48,6 +80,48 @@ router.get('/plans/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /plans/:
+ *  post:
+ *      summary: Create a new plan or update an existing one
+ *      description: If the plan is not filled out but created, it will be updated, otherwise a new plan will be created
+ *      tags: [Plans]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          planDays:
+ *                              type: array
+ *                              items:
+ *                                  type: string
+ *                                  format: date
+ *                              description: The days of the plan
+ *      responses:
+ *         200:
+ *            description: Returns a status and a plan document or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      planDoc:
+ *                          $ref: '#/components/schemas/Plan'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ *                      errorCode:
+ *                          type: string
+ *                          description: The error code, if any
+ */
 router.post('/plans/', async (req, res) => {
     try {
         let id = req.get('submittingId');
@@ -133,6 +207,30 @@ const resetUserPlan = async (id) => {
 
 }
 
+/**
+ * @openapi
+ * /plans/reset:
+ *  delete:
+ *      summary: Reset all user plans 
+ *      description: (can only run in January for abuse prevention reasons)
+ *      tags: [Plans]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *            description: Returns a status or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 // reset can only run in january
 router.delete('/plans/reset', async (req, res) => {
     try {
@@ -150,6 +248,38 @@ router.delete('/plans/reset', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /plans/{id}:
+ *  delete:
+ *      summary: Reset a user's plan by ID
+ *      tags: [Plans]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the plan to reset
+ *      responses:
+ *         200:
+ *            description: Returns a status and a plan document or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      planDoc:
+ *                          $ref: '#/components/schemas/Plan'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.delete('/plans/:id', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
@@ -169,6 +299,44 @@ router.delete('/plans/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /plans/{id}/excel:
+ *  get:
+ *      summary: Generate an Excel file for a user's plan by ID
+ *      tags: [Plans]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the plan to generate an Excel file for
+ *      responses:
+ *         200:
+ *            description: Returns an Excel file or an error message
+ *            content:
+ *             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *                schema:
+ *                  type: string
+ *                  format: binary
+ *                  description: The generated Excel file
+ *         default:
+ *            description: Unexpected error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get('/plans/:id/excel', async (req, res) => {
     console.log("excel");
     try {
@@ -207,3 +375,25 @@ router.get('/plans/:id/excel', async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *      Plan:
+ *          type: object
+ *          properties:
+ *              userId:
+ *                  type: string
+ *              managerId:
+ *                  type: string
+ *              type: 
+ *                  type: string
+ *              dates:
+ *                  type: array
+ *                  items:
+ *                      format: date
+ *              filledOut: 
+ *                  type: boolean
+ *                  default: false
+ */

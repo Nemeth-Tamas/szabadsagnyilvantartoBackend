@@ -1,0 +1,2230 @@
+openapi: 3.0.0
+info:
+  title: "Szabadságnyilvántartó API"
+  version: 1.0.0
+paths:
+  /kerelmek/:
+    {
+      get:
+        {
+          summary: "Get all kerelmek assigned to a specific manager",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of kerelmek or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelmek:
+                                    {
+                                      type: array,
+                                      description: "The list of kerelmek",
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Kerelem",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /kerelmek/own:
+    {
+      get:
+        {
+          summary: "Get all kerelmek assigned to a specific user",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of kerelmek or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelmek:
+                                    {
+                                      type: array,
+                                      description: "The list of kerelmek",
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Kerelem",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /kerelmek/all:
+    {
+      get:
+        {
+          summary: "Get all kerelmek assigned to anyone in the same domain as the user",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of kerelmek or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelmek:
+                                    {
+                                      type: array,
+                                      description: "The list of kerelmek",
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Kerelem",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /kerelmek/add:
+    {
+      post:
+        {
+          summary: "Add a new kerelem",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              managerId:
+                                {
+                                  type: string,
+                                  description: "The ID of the manager",
+                                },
+                              type:
+                                {
+                                  type: string,
+                                  description: "The type of the kerelem",
+                                },
+                              dates:
+                                {
+                                  type: array,
+                                  description: "The dates for the kerelem",
+                                  items: { type: string, format: date },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a kerelem or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelem:
+                                    { $ref: "#/components/schemas/Kerelem" },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/kerelmek/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve a kerelem by ID",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the kerelem to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a kerelem or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelem:
+                                    { $ref: "#/components/schemas/Kerelem" },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      delete:
+        {
+          summary: "Delete a kerelem by ID",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the kerelem to delete",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a kerelem or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelem:
+                                    { $ref: "#/components/schemas/Kerelem" },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/kerelmek/{id}/approve":
+    {
+      put:
+        {
+          summary: "Approve a kerelem by ID",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the kerelem to approve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a kerelem or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelem:
+                                    { $ref: "#/components/schemas/Kerelem" },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/kerelmek/{id}/reject":
+    {
+      put:
+        {
+          summary: "Reject a kerelem by ID",
+          tags: [Kerelmek],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the kerelem to reject",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              rejectedMessage:
+                                {
+                                  type: string,
+                                  description: "The reason for the rejection",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a kerelem or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  kerelem:
+                                    { $ref: "#/components/schemas/Kerelem" },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/plans/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve a plan by ID",
+          tags: [Plans],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the plan to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a plan or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  plan: { $ref: "#/components/schemas/Plan" },
+                                  filledOut:
+                                    {
+                                      type: boolean,
+                                      description: "Whether the plan is filled out or not",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      delete:
+        {
+          summary: "Reset a user's plan by ID",
+          tags: [Plans],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the plan to reset",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a plan document or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  planDoc:
+                                    { $ref: "#/components/schemas/Plan" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /plans/:
+    {
+      post:
+        {
+          summary: "Create a new plan or update an existing one",
+          description: "If the plan is not filled out but created, it will be updated, otherwise a new plan will be created",
+          tags: [Plans],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              planDays:
+                                {
+                                  type: array,
+                                  items: { type: string, format: date },
+                                  description: "The days of the plan",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a plan document or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  planDoc:
+                                    { $ref: "#/components/schemas/Plan" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                  errorCode:
+                                    {
+                                      type: string,
+                                      description: "The error code, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /plans/reset:
+    {
+      delete:
+        {
+          summary: "Reset all user plans",
+          description: "(can only run in January for abuse prevention reasons)",
+          tags: [Plans],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/plans/{id}/excel":
+    {
+      get:
+        {
+          summary: "Generate an Excel file for a user's plan by ID",
+          tags: [Plans],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the plan to generate an Excel file for",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns an Excel file or an error message",
+                  content:
+                    {
+                      ? application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+                      : {
+                          schema:
+                            {
+                              type: string,
+                              format: binary,
+                              description: "The generated Excel file",
+                            },
+                        },
+                    },
+                },
+              default:
+                {
+                  description: "Unexpected error",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /szabadsagok/own:
+    {
+      get:
+        {
+          summary: "Retrieve the szabadsagok of the authenticated user",
+          tags: [Szabadsagok],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of szabadsagok or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  szabadsagok:
+                                    {
+                                      type: array,
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Szabadsag",
+                                        },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/szabadsagok/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve the szabadsagok of a user by ID",
+          tags: [Szabadsagok],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose szabadsagok to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of szabadsagok or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  szabadsag:
+                                    {
+                                      type: array,
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Szabadsag",
+                                        },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /tappenz/start:
+    {
+      post:
+        {
+          summary: "Start a new tappenz entry with only starting date filled out",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              userId:
+                                {
+                                  type: string,
+                                  description: "The ID of the user starting the tappenz",
+                                },
+                              start:
+                                {
+                                  type: string,
+                                  format: date,
+                                  description: "The start date of the tappenz in format YYYY-MM-DD",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a tappenz document or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  tappenz:
+                                    { $ref: "#/components/schemas/Tappenz" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/tappenz/current/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve the current tappenz status of a user by ID",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose current tappenz status to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a boolean indicating if the user is currently in tappenz or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  current:
+                                    {
+                                      type: boolean,
+                                      description: "Whether the user is currently in tappenz",
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /tappenz/end:
+    {
+      post:
+        {
+          summary: "End a tappenz entry by filling out the end date",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              userId:
+                                {
+                                  type: string,
+                                  description: "The ID of the user ending the tappenz",
+                                },
+                              end:
+                                {
+                                  type: string,
+                                  format: date,
+                                  description: "The end date of the tappenz in format YYYY-MM-DD",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a tappenz document or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  tappenzDoc:
+                                    { $ref: "#/components/schemas/Tappenz" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/tappenz/{id}":
+    {
+      delete:
+        {
+          summary: "Delete a tappenz entry by ID",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the tappenz entry to delete",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a tappenz document or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  tappenzDoc:
+                                    { $ref: "#/components/schemas/Tappenz" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      get:
+        {
+          summary: "Retrieve the last 5 tappenz entries of a user by ID",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose last 5 tappenz entries to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of tappenz entries or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  tappenz:
+                                    {
+                                      type: array,
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Tappenz",
+                                        },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/tappenz/{id}/cumulative":
+    {
+      get:
+        {
+          summary: "Retrieve the cumulative number of days a user has taken as sick leave by ID",
+          tags: [Tappenz],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose cumulative sick leave days to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and the cumulative number of sick leave days or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  cumulative:
+                                    {
+                                      type: integer,
+                                      description: "The cumulative number of sick leave days",
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /users/:
+    {
+      get:
+        {
+          summary: "Retrieve a list of users based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of users or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  usersList:
+                                    {
+                                      type: array,
+                                      items:
+                                        { $ref: "#/components/schemas/User" },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /users/report:
+    {
+      get:
+        {
+          summary: "Retrieve a report of users who are on leave today",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a report of users on leave or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  report:
+                                    {
+                                      type: array,
+                                      items:
+                                        {
+                                          type: object,
+                                          properties:
+                                            {
+                                              userId:
+                                                {
+                                                  type: string,
+                                                  description: "The ID of the user",
+                                                },
+                                              name:
+                                                {
+                                                  type: string,
+                                                  description: "The name of the user",
+                                                },
+                                              isSick:
+                                                {
+                                                  type: boolean,
+                                                  description: "Whether the user is on sick leave",
+                                                },
+                                              dates:
+                                                {
+                                                  type: string,
+                                                  description: "The dates of leave, if any",
+                                                },
+                                            },
+                                        },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve a user by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user to retrieve",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  user: { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      delete:
+        {
+          summary: "Delete a user by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user to delete",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  user: { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      patch:
+        {
+          summary: "Update a user's preferences by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose preferences to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              perms: { type: array, items: { type: string } },
+                              role: { type: string },
+                              manager: { type: string },
+                              maxdays: { type: integer },
+                              remainingdays: { type: integer },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /users/register:
+    {
+      post:
+        {
+          summary: "Register a new user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              email: { type: string },
+                              password:
+                                {
+                                  type: string,
+                                  description: "The password should be bcrypt hashed already",
+                                },
+                              name: { type: string },
+                              role: { type: string },
+                              manager: { type: string },
+                              perms: { type: array, items: { type: string } },
+                              maxdays: { type: integer },
+                              remainingdays: { type: integer },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status, a user, and preferences or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  user: { $ref: "#/components/schemas/User" },
+                                  prefs:
+                                    {
+                                      type: object,
+                                      description: "The preferences of the user",
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/perms":
+    {
+      patch:
+        {
+          summary: "Update a user's permissions by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose permissions to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            { perms: { type: array, items: { type: string } } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/manager":
+    {
+      patch:
+        {
+          summary: "Update a user's manager by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose manager to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { manager: { type: string } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/role":
+    {
+      patch:
+        {
+          summary: "Update a user's role by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose role to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { role: { type: string } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/maxdays":
+    {
+      patch:
+        {
+          summary: "Update a user's maxdays by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose maxdays to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { maxdays: { type: integer } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/remainingdays":
+    {
+      patch:
+        {
+          summary: "Update a user's remainingdays by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose remainingdays to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { remainingdays: { type: integer } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/name":
+    {
+      patch:
+        {
+          summary: "Update a user's name by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose name to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { name: { type: string } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/password":
+    {
+      patch:
+        {
+          summary: "Update a user's password by ID based on the permissions of the submitting user",
+          description: "The password needs to be plaintext here because of appwrites limitation, so this endpoint should not be used",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose password to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { password: { type: string } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/users/{id}/email":
+    {
+      patch:
+        {
+          summary: "Update a user's email by ID based on the permissions of the submitting user",
+          tags: [Users],
+          security: [{ ApiKeyAuth: [] }],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user whose email to update",
+              },
+            ],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties: { email: { type: string } },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a user or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  newUser:
+                                    { $ref: "#/components/schemas/User" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  "/uzenetek/{id}":
+    {
+      get:
+        {
+          summary: "Retrieve a list of messages for a specific user by ID",
+          tags: [Messages],
+          parameters:
+            [
+              {
+                in: path,
+                name: id,
+                schema: { type: string },
+                required: true,
+                description: "The ID of the user to retrieve messages for",
+              },
+            ],
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a list of messages or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  messages:
+                                    {
+                                      type: array,
+                                      items:
+                                        {
+                                          $ref: "#/components/schemas/Message",
+                                        },
+                                    },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+  /uzenetek/create:
+    {
+      post:
+        {
+          summary: "Create a new message for a specific user based on the permissions of the submitting user",
+          tags: [Messages],
+          security: [{ ApiKeyAuth: [] }],
+          requestBody:
+            {
+              required: true,
+              content:
+                {
+                  application/json:
+                    {
+                      schema:
+                        {
+                          type: object,
+                          properties:
+                            {
+                              userId: { type: string },
+                              date: { type: string },
+                              message: { type: string },
+                            },
+                        },
+                    },
+                },
+            },
+          responses:
+            {
+              "200":
+                {
+                  description: "Returns a status and a message or an error message",
+                  content:
+                    {
+                      application/json:
+                        {
+                          schema:
+                            {
+                              type: object,
+                              properties:
+                                {
+                                  status:
+                                    {
+                                      type: string,
+                                      description: "The status of the request",
+                                    },
+                                  message:
+                                    { $ref: "#/components/schemas/Message" },
+                                  error:
+                                    {
+                                      type: string,
+                                      description: "The error message, if any",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }
+components:
+  securitySchemes:
+    { ApiKeyAuth: { type: apiKey, in: header, name: submittingId } }
+  schemas:
+    {
+      Kerelem:
+        {
+          type: object,
+          properties:
+            {
+              submittingId: { type: string },
+              managerId: { type: string },
+              type: { type: string },
+              dates: { type: array, items: { format: date } },
+              approved: { type: boolean, default: false },
+              rejected: { type: boolean, default: false },
+              rejectedMessage: { type: string },
+              szabadsagId: { type: string },
+              submittingUserIdentifier: { type: string },
+              submittingName: { type: string },
+            },
+        },
+      Plan:
+        {
+          type: object,
+          properties:
+            {
+              userId: { type: string },
+              managerId: { type: string },
+              type: { type: string },
+              dates: { type: array, items: { format: date } },
+              filledOut: { type: boolean, default: false },
+            },
+        },
+      Szabadsag:
+        {
+          type: object,
+          properties:
+            {
+              type: { type: string, default: sz },
+              dates: { type: array, items: { format: date } },
+              userId: { type: string },
+              managerId: { type: string },
+            },
+        },
+      Tappenz:
+        {
+          type: object,
+          properties:
+            {
+              startDate: { format: date },
+              endDate: { format: date },
+              userId: { type: string },
+              managerId: { type: string },
+            },
+        },
+      User:
+        {
+          type: object,
+          properties:
+            {
+              $id: { type: string },
+              name: { type: string },
+              password: { type: string },
+              email: { type: string },
+              prefs:
+                {
+                  type: object,
+                  properties:
+                    {
+                      perms: { type: array, items: { type: string } },
+                      role: { type: string },
+                      manager: { type: string },
+                      maxdays: { type: number },
+                      remainingdays: { type: number },
+                      sick: { type: boolean },
+                    },
+                },
+            },
+        },
+      Message:
+        {
+          type: object,
+          properties:
+            {
+              userId: { type: string },
+              date: { format: date },
+              message: { type: string },
+              sendingName: { type: string },
+            },
+        },
+    }
+tags: []

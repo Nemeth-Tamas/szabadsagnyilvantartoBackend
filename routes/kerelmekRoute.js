@@ -37,6 +37,31 @@ async function checkManagerAndSendEmail(managerId, name, dates) {
     }
 }
 
+/**
+ * @openapi
+ * /kerelmek/:
+ *  get:
+ *      summary: Get all kerelmek assigned to a specific manager
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *          description: Returns a status and a list of kerelmek or an error message
+ *          content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelmek:
+ *                          type: array
+ *                          description: The list of kerelmek
+ *                          items:
+ *                              $ref: '#/components/schemas/Kerelem'
+ */
 router.get('/kerelmek/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -49,6 +74,31 @@ router.get('/kerelmek/', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/own:
+ *  get:
+ *      summary: Get all kerelmek assigned to a specific user
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of kerelmek or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelmek:
+ *                          type: array
+ *                          description: The list of kerelmek
+ *                          items:
+ *                              $ref: '#/components/schemas/Kerelem'
+ */
 router.get('/kerelmek/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -59,6 +109,31 @@ router.get('/kerelmek/own', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/all:
+ *  get:
+ *      summary: Get all kerelmek assigned to anyone in the same domain as the user
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of kerelmek or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelmek:
+ *                          type: array
+ *                          description: The list of kerelmek
+ *                          items:
+ *                              $ref: '#/components/schemas/Kerelem'
+ */
 router.get('/kerelmek/all', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -80,7 +155,47 @@ router.get('/kerelmek/all', async (req, res) => {
     }
 });
     
-
+/**
+ * @openapi
+ * /kerelmek/add:
+ *  post:
+ *      summary: Add a new kerelem
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          managerId:
+ *                              type: string
+ *                              description: The ID of the manager
+ *                          type:
+ *                              type: string
+ *                              description: The type of the kerelem
+ *                          dates:
+ *                              type: array
+ *                              description: The dates for the kerelem
+ *                              items:
+ *                                  type: string
+ *                                  format: date
+ *      responses:
+ *         200:
+ *            description: Returns a status and a kerelem or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelem:
+ *                          $ref: '#/components/schemas/Kerelem'
+ */
 router.post('/kerelmek/add', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -119,6 +234,35 @@ router.post('/kerelmek/add', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/{id}:
+ *  get:
+ *      summary: Retrieve a kerelem by ID
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the kerelem to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a kerelem or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelem:
+ *                          $ref: '#/components/schemas/Kerelem'
+ */
 router.get('/kerelmek/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -133,6 +277,35 @@ router.get('/kerelmek/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/{id}:
+ *  delete:
+ *      summary: Delete a kerelem by ID
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the kerelem to delete
+ *      responses:
+ *         200:
+ *            description: Returns a status and a kerelem or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelem:
+ *                          $ref: '#/components/schemas/Kerelem'
+ */
 router.delete('/kerelmek/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -159,6 +332,35 @@ router.delete('/kerelmek/:id', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/{id}/approve:
+ *  put:
+ *      summary: Approve a kerelem by ID
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the kerelem to approve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a kerelem or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelem:
+ *                          $ref: '#/components/schemas/Kerelem'
+ */
 router.put('/kerelmek/:id/approve', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -192,6 +394,45 @@ router.put('/kerelmek/:id/approve', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /kerelmek/{id}/reject:
+ *  put:
+ *      summary: Reject a kerelem by ID
+ *      tags: [Kerelmek]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the kerelem to reject
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          rejectedMessage:
+ *                              type: string
+ *                              description: The reason for the rejection
+ *      responses:
+ *         200:
+ *            description: Returns a status and a kerelem or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      kerelem:
+ *                          $ref: '#/components/schemas/Kerelem'
+ */
 router.put('/kerelmek/:id/reject', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -210,3 +451,41 @@ router.put('/kerelmek/:id/reject', async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @openapi
+ * components:
+ *  securitySchemes:
+ *      ApiKeyAuth:
+ *          type: apiKey
+ *          in: header
+ *          name: submittingId
+ *  schemas:
+ *      Kerelem:
+ *          type: object
+ *          properties:
+ *              submittingId:
+ *                  type: string
+ *              managerId:
+ *                  type: string
+ *              type: 
+ *                  type: string
+ *              dates:
+ *                  type: array
+ *                  items:
+ *                      format: date
+ *              approved: 
+ *                  type: boolean
+ *                  default: false
+ *              rejected:
+ *                  type: boolean
+ *                  default: false
+ *              rejectedMessage: 
+ *                  type: string
+ *              szabadsagId:
+ *                  type: string
+ *              submittingUserIdentifier:
+ *                  type: string
+ *              submittingName:
+ *                  type: string
+ */

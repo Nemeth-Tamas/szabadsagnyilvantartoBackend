@@ -20,6 +20,45 @@ const users = new Users(client);
 const dbId = process.env.APPWRITE_DB_ID;
 const tappenzID = process.env.APPWRITE_TAPPENZ_COLLECTION;
 
+/**
+ * @openapi
+ * /tappenz/start:
+ *  post:
+ *      summary: Start a new tappenz entry with only starting date filled out
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          userId:
+ *                              type: string
+ *                              description: The ID of the user starting the tappenz
+ *                          start:
+ *                              type: string
+ *                              format: date
+ *                              description: The start date of the tappenz in format YYYY-MM-DD
+ *      responses:
+ *         200:
+ *            description: Returns a status and a tappenz document or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      tappenz:
+ *                          $ref: '#/components/schemas/Tappenz'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.post('/tappenz/start', async (req, res) => {
     // create new tappenz entry with only starting date filled out
     try {
@@ -44,6 +83,39 @@ router.post('/tappenz/start', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /tappenz/current/{id}:
+ *  get:
+ *      summary: Retrieve the current tappenz status of a user by ID
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose current tappenz status to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a boolean indicating if the user is currently in tappenz or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      current:
+ *                          type: boolean
+ *                          description: Whether the user is currently in tappenz
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get("/tappenz/current/:id", async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -76,6 +148,45 @@ router.get("/tappenz/current/:id", async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /tappenz/end:
+ *  post:
+ *      summary: End a tappenz entry by filling out the end date
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          userId:
+ *                              type: string
+ *                              description: The ID of the user ending the tappenz
+ *                          end:
+ *                              type: string
+ *                              format: date
+ *                              description: The end date of the tappenz in format YYYY-MM-DD
+ *      responses:
+ *         200:
+ *            description: Returns a status and a tappenz document or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      tappenzDoc:
+ *                          $ref: '#/components/schemas/Tappenz'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.post("/tappenz/end", async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -103,6 +214,38 @@ router.post("/tappenz/end", async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /tappenz/{id}:
+ *  delete:
+ *      summary: Delete a tappenz entry by ID
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the tappenz entry to delete
+ *      responses:
+ *         200:
+ *            description: Returns a status and a tappenz document or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      tappenzDoc:
+ *                          $ref: '#/components/schemas/Tappenz'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.delete('/tappenz/:id', async (req, res) => {
     try {
         console.log(req.params.id);
@@ -126,6 +269,40 @@ router.delete('/tappenz/:id', async (req, res) => {
 });
 
 // returns last 5 tappenz entries
+/**
+ * @openapi
+ * /tappenz/{id}:
+ *  get:
+ *      summary: Retrieve the last 5 tappenz entries of a user by ID
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose last 5 tappenz entries to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of tappenz entries or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      tappenz:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Tappenz'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get("/tappenz/:id", async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -141,6 +318,39 @@ router.get("/tappenz/:id", async (req, res) => {
     }
 })
 
+/**
+ * @openapi
+ * /tappenz/{id}/cumulative:
+ *  get:
+ *      summary: Retrieve the cumulative number of days a user has taken as sick leave by ID
+ *      tags: [Tappenz]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose cumulative sick leave days to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and the cumulative number of sick leave days or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      cumulative:
+ *                          type: integer
+ *                          description: The cumulative number of sick leave days
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 // TODO: how many days did the user take as sick leave.
 router.get("/tappenz/:id/cumulative", async (req, res) => {
     try {
@@ -169,3 +379,20 @@ router.get("/tappenz/:id/cumulative", async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *      Tappenz:
+ *          type: object
+ *          properties:
+ *              startDate: 
+ *                  format: date
+ *              endDate:
+ *                  format: date
+ *              userId:
+ *                  type: string
+ *              managerId:
+ *                  type: string
+ */

@@ -20,6 +20,33 @@ const users = new Users(client);
 const dbId = process.env.APPWRITE_DB_ID;
 const szabadsagID = process.env.APPWRITE_SZABADSAGOK_COLLECTION;
 
+/**
+ * @openapi
+ * /szabadsagok/own:
+ *  get:
+ *      summary: Retrieve the szabadsagok of the authenticated user
+ *      tags: [Szabadsagok]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of szabadsagok or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      szabadsagok:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Szabadsag'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get('/szabadsagok/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -32,6 +59,40 @@ router.get('/szabadsagok/own', async (req, res) => {
     }
 });
 
+/**
+ * @openapi
+ * /szabadsagok/{id}:
+ *  get:
+ *      summary: Retrieve the szabadsagok of a user by ID
+ *      tags: [Szabadsagok]
+ *      security:
+ *          - ApiKeyAuth: []
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: The ID of the user whose szabadsagok to retrieve
+ *      responses:
+ *         200:
+ *            description: Returns a status and a list of szabadsagok or an error message
+ *            content:
+ *             application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *                          description: The status of the request
+ *                      szabadsag:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#/components/schemas/Szabadsag'
+ *                      error:
+ *                          type: string
+ *                          description: The error message, if any
+ */
 router.get('/szabadsagok/:id', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
@@ -52,3 +113,23 @@ router.get('/szabadsagok/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *      Szabadsag:
+ *          type: object
+ *          properties:
+ *              type: 
+ *                  type: string
+ *                  default: sz
+ *              dates:
+ *                  type: array
+ *                  items:
+ *                      format: date
+ *              userId:
+ *                  type: string
+ *              managerId:
+ *                  type: string
+ */
