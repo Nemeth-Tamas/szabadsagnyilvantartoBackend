@@ -66,7 +66,9 @@ router.get('/kerelmek/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
-            let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("managerId", submittingUser.$id), Query.orderDesc("$createdAt")]);
+            let offset = req.query.offset || 0;
+            let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("managerId", submittingUser.$id), Query.orderDesc("$createdAt"), Query.limit(25), Query.offset(offset)]);
+            
             res.send({ status: "success", kerelmek });
         }
     } catch (error) {
@@ -102,7 +104,8 @@ router.get('/kerelmek/', async (req, res) => {
 router.get('/kerelmek/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
-        let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", submittingUser.$id), Query.orderDesc("$createdAt")]);
+        let offset = req.query.offset || 0;
+        let kerelmek = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", submittingUser.$id), Query.orderDesc("$createdAt"), Query.limit(25), Query.offset(offset)]);
         res.send({ status: "success", kerelmek });
     } catch (error) {
         res.send({ status: "fail", error });

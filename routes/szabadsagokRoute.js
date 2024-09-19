@@ -51,7 +51,7 @@ router.get('/szabadsagok/own', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("felhasznalo.request")) {
-            let szabadsagok = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", submittingUser.$id), Query.orderDesc("$createdAt")]);
+            let szabadsagok = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", submittingUser.$id), Query.orderDesc("$createdAt"), Query.limit(1000)]);
             res.send({ status: "success", szabadsagok });
         }
     } catch (error) {
@@ -99,10 +99,10 @@ router.get('/szabadsagok/:id', async (req, res) => {
         if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
             console.log(req.params.id);
             console.log(submittingUser.$id);
-            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id), Query.orderDesc("$createdAt")]);
+            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id), Query.orderDesc("$createdAt"), Query.limit(1000)]);
             res.send({ status: "success", szabadsag });
         } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
-            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id), Query.orderDesc("$createdAt")])
+            let szabadsag = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id), Query.orderDesc("$createdAt"), Query.limit(1000)]);
             res.send({ status: "success", szabadsag });
         } else {
             res.send({ status: "fail", error: "Permission denied" });

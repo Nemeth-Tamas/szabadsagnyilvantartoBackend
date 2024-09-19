@@ -28,7 +28,7 @@ async function checkStatus(user) {
     // check tappenz and if on leave
     let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", user.$id), Query.orderDesc("startDate")])).documents[0];
     user.prefs.sick = isSick(tappenz);
-    let szabadsagok = (await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", user.$id)])).documents;
+    let szabadsagok = (await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", user.$id), Query.limit(1000)])).documents;
     user.prefs.onLeave = await isOnLeave(szabadsagok);
     return user;
 }
@@ -64,7 +64,12 @@ router.get('/users/', async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
-            let usersList = await users.list();
+            let usersList = await users.list([Query.limit(25), Query.offset(0)]);
+            // while there are more users to fetch (pagination) add them to the list
+            while (usersList.users.length < usersList.total) {
+                usersList.users = usersList.users.concat((await users.list([Query.limit(25), Query.offset(usersList.users.length)])).users);
+            }
+
             let toReturn = [];
             for (let user of usersList.users) {
                 if (user.email.endsWith(submittingUser.email.split("@")[1])) {
@@ -74,7 +79,12 @@ router.get('/users/', async (req, res) => {
             usersList.users = toReturn;
             res.send({ status: "success", usersList });
         } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
-            const usersList = await users.list();
+            const usersList = await users.list([Query.limit(25), Query.offset(0)]);
+            // while there are more users to fetch (pagination) add them to the list
+            while (usersList.users.length < usersList.total) {
+                usersList.users = usersList.users.concat((await users.list([Query.limit(25), Query.offset(usersList.users.length)])).users);
+            }
+            
             usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingUser.$id));
             for (let user of usersList.users) {
                 user = await checkStatus(user);
@@ -281,18 +291,18 @@ router.delete('/users/:id', async (req, res) => {
         const user = await users.delete(req.params.id);
 
         // delete requests
-        const requests = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", req.params.id)]);
+        const requests = await database.listDocuments(dbId, kerelmekId, [Query.equal("submittingId", req.params.id), Query.limit(1000)]);
         for (let request of requests.documents) {
             await database.deleteDocument(dbId, kerelmekId, request.$id);
         }
 
         // delete szabadsagok
-        const szabadsagok = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id)]);
+        const szabadsagok = await database.listDocuments(dbId, szabadsagID, [Query.equal("userId", req.params.id), Query.limit(1000)]);
         for (let szabadsag of szabadsagok.documents) {
             await database.deleteDocument(dbId, szabadsagID, szabadsag.$id);
         }
 
-        const plans = await database.listDocuments(dbId, plansID, [Query.equal("userId", req.params.id)]);
+        const plans = await database.listDocuments(dbId, plansID, [Query.equal("userId", req.params.id), Query.limit(1000)]);
         for (let plan of plans.documents) {
             await database.deleteDocument(dbId, plansID, plan.$id);
         }

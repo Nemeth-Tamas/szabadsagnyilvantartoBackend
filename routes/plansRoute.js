@@ -236,7 +236,7 @@ router.delete('/plans/reset', async (req, res) => {
     try {
         const submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state") && (new Date().getMonth() == 0)) {
-            let users = await database.listDocuments(dbId, plansID);
+            let users = await database.listDocuments(dbId, plansID, [Query.limit(1000)]);
             for (const element of users.documents) {
                 let uId = element.userId;
                 resetUserPlan(uId);

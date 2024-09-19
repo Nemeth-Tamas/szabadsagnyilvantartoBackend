@@ -356,7 +356,7 @@ router.get("/tappenz/:id/cumulative", async (req, res) => {
     try {
         let submittingUser = await users.get(req.get('submittingId'));
         if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
-            let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", req.params.id), Query.orderDesc("startDate")])).documents;
+            let tappenz = (await database.listDocuments(dbId, tappenzID, [Query.equal("userId", req.params.id), Query.orderDesc("startDate"), Query.limit(1000)])).documents;
             let cumulative = 0;
             for (const element of tappenz) {
                 if (element.endDate == null) {
