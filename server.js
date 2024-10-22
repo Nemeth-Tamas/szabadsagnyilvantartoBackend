@@ -24,10 +24,10 @@ client
 
 app.use(userRoute);
 app.use(kerelmekRoute);
-app.use(szabadsagokRoute);
-app.use(uzenetekRoute);
+// app.use(szabadsagokRoute);
+// app.use(uzenetekRoute);
 app.use(plansRoute);
-app.use(tappenzRoute);
+// app.use(tappenzRoute);
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
