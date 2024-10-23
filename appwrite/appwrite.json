@@ -381,6 +381,26 @@
                 ".npm"
             ],
             "path": "functions/rejectKerelem"
+        },
+        {
+            "$id": "6719118324df2e1c4a89",
+            "name": "getPlanById",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/getPlanById"
         }
     ]
 }
