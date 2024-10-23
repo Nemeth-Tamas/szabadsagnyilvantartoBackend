@@ -301,6 +301,26 @@
                 ".npm"
             ],
             "path": "functions/kerelmekAdd"
+        },
+        {
+            "$id": "6719068e1e29c55fabae",
+            "name": "getKerelemById",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/getKerelemById"
         }
     ]
 }
