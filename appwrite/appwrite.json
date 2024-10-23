@@ -361,6 +361,26 @@
                 ".npm"
             ],
             "path": "functions/approveKerelem"
+        },
+        {
+            "$id": "67190f5dada4200fb3cc",
+            "name": "rejectKerelem",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/rejectKerelem"
         }
     ]
 }
