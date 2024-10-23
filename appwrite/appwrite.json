@@ -341,6 +341,26 @@
                 ".npm"
             ],
             "path": "functions/deleteKerelem"
+        },
+        {
+            "$id": "67190ca4d04d4d27034c",
+            "name": "approveKerelem",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/approveKerelem"
         }
     ]
 }
