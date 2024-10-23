@@ -481,6 +481,26 @@
                 ".npm"
             ],
             "path": "functions/planResetById"
+        },
+        {
+            "$id": "67191c78a05d72f1e097",
+            "name": "planToExcel",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/planToExcel"
         }
     ]
 }
