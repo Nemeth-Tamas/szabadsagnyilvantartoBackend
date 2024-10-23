@@ -226,7 +226,9 @@
             "$id": "6718f5ed6aff85df77d8",
             "name": "sendEmail",
             "runtime": "node-20.0",
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 15,
@@ -239,6 +241,26 @@
                 ".npm"
             ],
             "path": "functions/sendEmail"
+        },
+        {
+            "$id": "6718f9a2725762b7784b",
+            "name": "getKerelmek",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/getKerelmek"
         }
     ]
 }
