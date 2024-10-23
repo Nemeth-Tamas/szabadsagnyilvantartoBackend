@@ -26,7 +26,7 @@ app.use(userRoute);
 // app.use(kerelmekRoute);
 // app.use(szabadsagokRoute);
 // app.use(uzenetekRoute);
-app.use(plansRoute);
+// app.use(plansRoute);
 // app.use(tappenzRoute);
 
 app.listen(port, () => {
