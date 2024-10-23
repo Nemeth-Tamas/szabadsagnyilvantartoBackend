@@ -25,7 +25,7 @@ export default async ({ req, res, log, error }) => {
   const szabadsagID = process.env.APPWRITE_SZABADSAG_COLLECTION;
 
   // Validate the environment variables
-  if (!dbId || !kerelmekId || szabadsagID) {
+  if (!dbId || !kerelmekId || !szabadsagID) {
     error("Database or collection ID is missing in environment variables.");
     return res.json({ status: "fail", error: "Server configuration error" });
   }
