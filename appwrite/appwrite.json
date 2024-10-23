@@ -421,6 +421,66 @@
                 ".npm"
             ],
             "path": "functions/submitPlan"
+        },
+        {
+            "$id": "671917c63893ff2c9299",
+            "name": "resetPlanById",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/resetPlanById"
+        },
+        {
+            "$id": "671919027d81552ae721",
+            "name": "planFullReset",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/planFullReset"
+        },
+        {
+            "$id": "67191b23e2a4a3556715",
+            "name": "planResetById",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/planResetById"
         }
     ]
 }
