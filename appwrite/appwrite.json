@@ -541,6 +541,26 @@
                 ".npm"
             ],
             "path": "functions/getUserById"
+        },
+        {
+            "$id": "671b9b34152e3723bb81",
+            "name": "registerUser",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/registerUser"
         }
     ]
 }
