@@ -581,6 +581,66 @@
                 ".npm"
             ],
             "path": "functions/deleteUserById"
+        },
+        {
+            "$id": "671ba403b10def03458e",
+            "name": "updateUserPrefs",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/updateUserPrefs"
+        },
+        {
+            "$id": "671ba6ff469a7a260555",
+            "name": "updateUserEmail",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/updateUserEmail"
+        },
+        {
+            "$id": "671ba70f7e41a4b3cc26",
+            "name": "updateUserName",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/updateUserName"
         }
     ]
 }
