@@ -501,6 +501,26 @@
                 ".npm"
             ],
             "path": "functions/planToExcel"
+        },
+        {
+            "$id": "671b6a483c518e474307",
+            "name": "getUsers",
+            "runtime": "node-20.0",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/getUsers"
         }
     ]
 }
