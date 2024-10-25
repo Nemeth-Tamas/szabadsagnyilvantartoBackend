@@ -37,8 +37,9 @@ async function checkStatus(user, database, dbId, tappenzID, szabadsagID) {
   return user;
 }
 
+// This is your Appwrite function
+// It's executed each time we get a request
 export default async ({ req, res, log, error }) => {
-  log("Get users function called");
   const client = new Client();
 
   // Initialize the client and set the endpoint, project, and API key
@@ -62,72 +63,47 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
   const users = new Users(client);
 
-  log("Getting user by ID");
-
   let submittingId;
   let submittingUser;
+  let userId;
   try {
     const body = JSON.parse(req.body);
     
     // Check if userId exists in the request body
-    if (!body || !body.submittingId) {
-      throw new Error("submittingId is missing in the request body.");
+    if (!body || !body.submittingId || !body.userId) {
+      throw new Error("submittingId|userId is missing in the request body.");
     }
     submittingId = body.submittingId;
+    userId = body.userId;
 
     submittingUser = await users.get(submittingId);
   } catch (parseError) {
     error(`Failed to parse request body or missing submittingId: ${parseError.message}`);
     return res.json({ status: "fail", error: "Invalid request body or missing submittingId" });
   }
-
-  log("body")
-
+  
   try {
     if (submittingUser.prefs.perms.includes("jegyzo.list_all")) {
-      let usersList = await users.list([
-        Query.limit(25),
-        Query.offset(0),
-      ]);
-
-      while (usersList.users.length < usersList.total) {
-        usersList.users = usersList.users.concat((await users.list([
-          Query.limit(25),
-          Query.offset(usersList.users.length)
-        ])).users);
-      }
-
-      log(usersList.users.length);
-      log(usersList.total);
-
-      let toReturn = [];
-      for (let user of usersList.users) {
-        if (user.email.endsWith(submittingUser.email.split("@")[1])) {
-          toReturn.push(await checkStatus(user, database, dbId, tappenzID, szabadsagID));
-        }
-      }
-      usersList.users = toReturn;
-      log(usersList.users.length);
-      return res.json({ status: "success", usersList });
+      let user = await users.get(userId);
+      if (user.email.endsWith(submittingUser.email.split("@")[1])) {
+        user = await checkStatus(user, database, dbId, tappenzID, szabadsagID);
+        return res.json({ status: "success", user });
+      } else {
+        return res.json({ status: "fail", error: "You are not allowed to view this user's data." });
+      } 
     } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
-      const usersList = await users.list([Query.limit(25), Query.offset(0)]);
-
-      while (usersList.users.length < usersList.total) {
-        usersList.users = usersList.users.concat((await users.list([Query.limit(25), Query.offset(usersList.users.length)])).users);
+      let user = await users.get(userId);
+      if (user.email.endsWith(submittingUser.email.split("@")[1]) && user.prefs.manager.includes(submittingId)) {
+        user = await checkStatus(user, database, dbId, tappenzID, szabadsagID);
+        return res.json({ status: "success", user });
+      } else {
+        return res.json({ status: "fail", error: "You are not allowed to view this user's data." });
       }
-
-      usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingId));
-      for (let user of usersList.users) {
-        user = await checkStatus(user);
-      }
-
-      return res.json({ status: "success", usersList });
     } else {
-      error("User does not have permission to get users.");
-      return res.json({ status: "fail", error: "User does not have permission to get users." });
+      return res.json({ status: "fail", error: "You are not allowed to view this user's data." });
     }
   } catch (err) {
-    error(`Failed to get users: ${err.message}`);
-    return res.json({ status: "fail", error: "Failed to get users" });
+    error(`Failed to get user data: ${err.message}`);
+    return res.json({ status: "fail", err: "Failed to get user data" });
   }
 };
