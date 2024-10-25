@@ -22,7 +22,7 @@ client
     .setProject(process.env.APPWRITE_PROJECT_ID)
     .setKey(process.env.APPWRITE_API_KEY);
 
-app.use(userRoute);
+// app.use(userRoute);
 // app.use(kerelmekRoute);
 // app.use(szabadsagokRoute);
 // app.use(uzenetekRoute);
