@@ -64,6 +64,15 @@ export default async ({ req, res, log, error }) => {
     let role;
     if (body.role != undefined) {
       role = body.role;
+      if (body.role == "felhasznalo") {
+        perms = ["felhasznalo.request", "felhasznalo.delete_request"]
+      } else if (body.role == "irodavezeto") {
+        ["felhasznalo.request", "felhasznalo.delete_request", "irodavezeto.approve", "irpdavezeto.reject", "irodavezeto.message_send", "irodavezeto.list_own"]
+      } else if (body.role == "jegyzo") {
+        ["felhasznalo.request","felhasznalo.delete_request","irodavezeto.approve","irpdavezeto.reject","irodavezeto.message_send","jegyzo.edit_user","jegyzo.create_user","jegyzo.delete_user","jegyzo.list_all"]
+      } else if (body.role == "admin") {
+        ["felhasznalo.request","felhasznalo.delete_request","felhasznalo.send","irodavezeto.approve","irpdavezeto.reject","irodavezeto.message_send","jegyzo.edit_user","jegyzo.create_user","jegyzo.delete_user","hr.edit_user_perms","hr.edit_user_current_state","jegyzo.list_all"]
+      }
     } else {
       role = user.prefs.role;
     }
