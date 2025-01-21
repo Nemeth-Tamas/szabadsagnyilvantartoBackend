@@ -110,16 +110,21 @@ export default async ({ req, res, log, error }) => {
       log(usersList.users.length);
       return res.json({ status: "success", usersList });
     } else if (submittingUser.prefs.perms.includes("irodavezeto.list_own")) {
+      log("list own");
       const usersList = await users.list([Query.limit(25), Query.offset(0)]);
+      log(usersList.users.length);
 
       while (usersList.users.length < usersList.total) {
         usersList.users = usersList.users.concat((await users.list([Query.limit(25), Query.offset(usersList.users.length)])).users);
       }
+      log(usersList.users.length);
 
       usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingId));
+      log(usersList.users.length);
       for (let user of usersList.users) {
         user = await checkStatus(user);
       }
+      log(usersList.users.length);
 
       return res.json({ status: "success", usersList });
     } else {
