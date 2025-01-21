@@ -125,9 +125,11 @@ export default async ({ req, res, log, error }) => {
 
       usersList.users = usersList.users.filter(user => user.prefs.manager.includes(submittingId));
       log(`After fileter: ${usersList.users.length}`);
+      let toReturn = [];
       for (let user of usersList.users) {
-        user = await checkStatus(user);
+        toReturn.push(await checkStatus(user, database, dbId, tappenzID, szabadsagID));
       }
+      usersList.users = toReturn;
       log(`After for: ${usersList.users.length}`);
 
       return res.json({ status: "success", usersList });
