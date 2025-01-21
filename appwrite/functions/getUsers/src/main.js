@@ -20,12 +20,14 @@ const isOnLeave = async (szabadsagok) => {
 }
 
 async function checkStatus(user, database, dbId, tappenzID, szabadsagID) {
+  log(`In checkStatus: ${user.name}`);
   let tappenz = (await database.listDocuments(
     dbId, tappenzID, [
       Query.equal("userId", user.$id),
       Query.orderDesc("startDate")
     ]
   )).documents[0];
+  log(`Tappenz: ${tappenz}`);
   user.prefs.sick = isSick(tappenz);
   let szabadsagok = (await database.listDocuments(
     dbId, szabadsagID, [
@@ -33,7 +35,9 @@ async function checkStatus(user, database, dbId, tappenzID, szabadsagID) {
       Query.limit(1000)
     ]
   )).documents;
+  log(`Szabadsagok: ${szabadsagok}`);
   user.prefs.onLeave = await isOnLeave(szabadsagok);
+  log(`User: ${user.name} - Sick: ${user.prefs.sick} - OnLeave: ${user.prefs.onLeave}`);
   return user;
 }
 
