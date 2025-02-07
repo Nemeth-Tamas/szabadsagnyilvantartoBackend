@@ -91,3 +91,9 @@ Szabadsagok api documentation can be found [here](https://documenter.getpostman.
 Kerelmek api documentation can be found [here](https://documenter.getpostman.com/view/10735883/2s93eU1tWb)
 
 Set appwrite .env `_APP_FUNCTIONS_INACTIVE_THRESHOLD=3600` and `_APP_FUNCTIONS_CONTAINERS=20`
+
+---
+
+Appwrite funcitons: <br />
+cd into the appwrite directory <br />
+`appwrite deploy function`
