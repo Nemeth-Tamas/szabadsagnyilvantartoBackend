@@ -46,6 +46,17 @@ export default async ({ req, res, log, error }) => {
   }
 
   try {
+    if (submittingUser.prefs.perms.includes("hr.edit_user_current_state")) {
+      let kerelmek = await database.listDocuments(dbId, kerelmekId, [
+        Query.equal("submittingUserIdentifier", submittingUser.email.split("@")[1]),
+        Query.orderDesc("$createdAt"),
+        Query.limit(25),
+        Query.offset(offset)
+      ])
+
+      return res.json({ status: "success", kerelmek });
+    }
+
     if (submittingUser.prefs.perms.includes("irodavezeto.approve")) {
       let kerelmek = await database.listDocuments(dbId, kerelmekId, [
         Query.equal("managerId", submittingId),
