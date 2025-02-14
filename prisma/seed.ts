@@ -67,7 +67,32 @@ async function main() {
         new Date("2025-01-05")
       ]
     }
-  })
+  });
+
+  const demoUserTappenz1 = await prisma.tappenz.upsert({
+    where: {
+      id: "1"
+    },
+    update: {},
+    create: {
+      userId: demoUser.id,
+      managerId: demoManager.id,
+      startDate: new Date("2025-01-10"),
+      endDate: new Date("2025-01-15"),
+    }
+  });
+
+  const demoUserTappenz2 = await prisma.tappenz.upsert({
+    where: {
+      id: "2"
+    },
+    update: {},
+    create: {
+      userId: demoUser.id,
+      managerId: demoManager.id,
+      startDate: new Date("2025-01-20"),
+    }
+  });
 }
 
 main()

@@ -110,4 +110,81 @@ router.get("/users", authenticateToken, authorizeRole('irodavezeto'), async (req
   }
 });
 
+router.get("/user/:id", authenticateToken, authorizeRole("irodavezeto"), async (req: Request, res: Response): Promise<any> => {
+  let reqUser = req.user;
+
+  if (!reqUser) return res.status(401).json({ error: 'User Object Not Found' });
+
+  try {
+    let user: User | null = null;
+
+    if (reqUser.role === 'jegyzo' || reqUser.role === 'admin') {
+      user = await prisma.user.findUnique({
+        where: {
+          id: req.params.id
+        }
+      });
+    } else if (reqUser.role === 'irodavezeto') {
+      user = await prisma.user.findFirst({
+        where: {
+          id: req.params.id,
+          managerId: reqUser.id
+        }
+      });
+    }
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.email.endsWith(reqUser.email.split('@')[1])) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    res.json(await checkStatus(user));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.patch("/user/:id", authenticateToken, authorizeRole("admin"), async (req: Request, res: Response): Promise<any> => {
+  let reqUser = req.user;
+
+  if (!reqUser) return res.status(401).json({ error: 'User Object Not Found' });
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: {
+        id: req.params.id
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.email.endsWith(reqUser.email.split('@')[1])) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { name = null, email = null, role = null, maxDays = null, remainingDays = null, managerId = null } = req.body;
+
+    let newuser = await prisma.user.update({
+      where: {
+        id: req.params.id
+      },
+      data: {
+        name: name || user.name,
+        email: email || user.email,
+        role: role || user.role,
+        maxDays: maxDays || user.maxDays,
+        remainingDays: remainingDays || user.remainingDays,
+        managerId: managerId || user.managerId
+      }
+    });
+
+    res.json(await checkStatus(newuser));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
