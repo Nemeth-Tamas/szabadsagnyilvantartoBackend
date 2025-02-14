@@ -22,9 +22,22 @@ model User {
   remainingDays Int @default(0)
   maxDays Int @default(0)
   sick    Boolean  @default(false)
+  onLeave Boolean  @default(false)
   manager   User?    @relation("Manager", fields: [managerId], references: [id])
   managerId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   User User[] @relation("Manager")
+  Szabadsag Szabadsag[] @relation("UserRelation")
+}
+
+model Szabadsag {
+  id        String   @id @default(cuid())
+  user      User     @relation("UserRelation", fields: [userId], references: [id])
+  userId    String
+  type      String
+  dates     DateTime[]
+  managerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

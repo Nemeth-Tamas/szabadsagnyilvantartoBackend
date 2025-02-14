@@ -15,7 +15,6 @@ yarn-error.log*
 .env
 
 # Prisma
-prisma/migrations/
 prisma/dev.db
 
 # Build
