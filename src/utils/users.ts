@@ -1,6 +1,6 @@
 import { Szabadsag, Tappenz, User } from "@prisma/client";
 
-const isOnLeave = async (szabadsagok: Szabadsag[]): Promise<boolean> => {
+export const isOnLeave = async (szabadsagok: Szabadsag[]): Promise<boolean> => {
   if (!szabadsagok.length) return false;
   let today = new Date();
   today.setHours(0, 0, 0, 0);

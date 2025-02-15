@@ -93,6 +93,30 @@ async function main() {
       startDate: new Date("2025-01-20"),
     }
   });
+
+  const demoUserRequest = await prisma.kerelem.upsert({
+    where: {
+      id: "1"
+    },
+    update: {},
+    create: {
+      userId: demoUser.id,
+      managerId: demoManager.id,
+      type: "SZ",
+      dates: [
+        new Date("2025-02-01"),
+        new Date("2025-02-02"),
+        new Date("2025-02-03"),
+        new Date("2025-02-04"),
+        new Date("2025-02-05")
+      ],
+      managerName: demoManager.name,
+      submittingName: demoUser.name,
+      submittingEmailIdentifier: demoUser.email.split('@')[1]
+    }
+  });
+
+  console.log({ demoAdmin });
 }
 
 main()

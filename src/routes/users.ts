@@ -164,7 +164,7 @@ router.patch("/user/:id", authenticateToken, authorizeRole("admin"), async (req:
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
-    const { name = null, email = null, role = null, maxDays = null, remainingDays = null, managerId = null } = req.body;
+    const { name = null, email = null, role = null, maxDays = null, remainingDays = null, managerId = null, password = null } = req.body;
 
     let newuser = await prisma.user.update({
       where: {
@@ -176,7 +176,8 @@ router.patch("/user/:id", authenticateToken, authorizeRole("admin"), async (req:
         role: role || user.role,
         maxDays: maxDays || user.maxDays,
         remainingDays: remainingDays || user.remainingDays,
-        managerId: managerId || user.managerId
+        managerId: managerId || user.managerId,
+        password: password || user.password
       }
     });
 
