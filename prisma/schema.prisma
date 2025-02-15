@@ -33,6 +33,7 @@ model User {
   Kerelem Kerelem[]
   Uzenetek Uzenetek[]
   Plan Plan?
+  RefreshToken RefreshToken[]
 }
 
 model Szabadsag {
@@ -95,6 +96,15 @@ model Plan {
   filledOut Boolean  @default(false)
   dates     DateTime[]
   managerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String  @id @default(cuid())
+  token     String  @unique
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

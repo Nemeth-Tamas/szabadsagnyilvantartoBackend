@@ -6,6 +6,8 @@ import { checkStatus } from '@/utils/users';
 import prisma from '@/lib/db';
 import { authenticateToken, authorizeRole } from '@/lib/middleware';
 import { User } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -23,14 +25,15 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
 
     if (!user) return res.status(401).json({ error: 'User not found' });
 
-    const isPasswordValid = password === user.password;
+    const isPasswordValid = bcrypt.compareSync(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
     if (!process.env.JWT_SECRET) process.exit("JWT_SECRET not set");
-    const token = jwt.sign({
+
+    const accessToken = jwt.sign({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -38,9 +41,108 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
       maxDays: user.maxDays,
       remainingDays: user.remainingDays,
       managerId: user.managerId
+    }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    const refreshToken = jwt.sign({
+      id: user.id,
+      email: user.email
     }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token });
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id
+      }
+    });
+
+    res.cookie('refreshToken', refreshToken, {httpOnly: true });
+    res.json({ accessToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post("/refresh-token", async (req: Request, res: Response): Promise<any> => {
+  console.log("Called at: ", new Date().toISOString());
+  
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    if (!process.env.JWT_SECRET) process.exit("JWT_SECRET not set");
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as { id: string, email: string, exp: number };
+
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: {
+        token: refreshToken
+      }
+    });
+
+    if (!storedToken) return res.status(401).json({ error: 'Invalid refresh token' });
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.id
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const accessToken = jwt.sign({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      maxDays: user.maxDays,
+      remainingDays: user.remainingDays,
+      managerId: user.managerId
+    }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    const oneDayInSeconds = 24 * 60 * 60;
+    if (decoded.exp - currentTime < oneDayInSeconds) {
+      const newRefreshToken = jwt.sign({
+        id: user.id,
+        email: user.email
+      }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      await prisma.refreshToken.update({
+        where: {
+          token: refreshToken
+        },
+        data: {
+          token: newRefreshToken
+        }
+      });
+
+      res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
+    }
+
+    res.json({ accessToken });
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post("/logout", async (req: Request, res: Response): Promise<any> => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    await prisma.refreshToken.delete({
+      where: {
+        token: refreshToken
+      }
+    });
+
+    res.clearCookie('refreshToken');
+    res.json({ message: 'Logged out' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -63,7 +165,7 @@ router.post("/register", authenticateToken, authorizeRole('admin'), async (req: 
       data: {
         email,
         name,
-        password,
+        password: bcrypt.hashSync(password, 10),
         role,
         maxDays,
         remainingDays,

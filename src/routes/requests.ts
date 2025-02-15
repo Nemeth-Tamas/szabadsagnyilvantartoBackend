@@ -65,6 +65,7 @@ router.post("/requests", authenticateToken, async (req: Request, res: Response):
 
 router.get("/requests/own", authenticateToken, authorizeRole("felhasznalo"), async (req: Request, res: Response): Promise<any> => {
   let reqUser = req.user;
+  console.log(reqUser);
   let { offset = 0, limit = 25 } = req.query;
 
   if (!reqUser) return res.status(401).json({ error: 'Unauthorized' });

@@ -28,16 +28,30 @@ router.get("/plans/:userId", authenticateToken, async (req: Request, res: Respon
         }
       });
       if (!user) return res.status(404).json({ error: 'User not found' });
-      let newPlan = await prisma.plan.create({
-        data: {
-          userId: user.id,
-          managerId: user.managerId || user.id,
-          dates: [],
-          filledOut: false
+      try {
+        let newPlan = await prisma.plan.create({
+          data: {
+            userId: user.id,
+            managerId: user.managerId || user.id,
+            dates: [],
+            filledOut: false
+          }
+        });
+        plan = newPlan;
+      } catch (error: any) {
+        if (error.code === 'P2002') { // Unique constraint fail because react double calls
+          plan = await prisma.plan.findFirst({
+            where: {
+              userId: userId
+            }
+          });
+        } else {
+          throw error;
         }
-      });
-      plan = newPlan;
+      }
     }
+
+    if (!plan) return res.status(404).json({ error: 'Plan not found' });
 
     if (reqUser.role === 'felhasznalo' || reqUser.role === 'irodavezeto' || reqUser.role === 'jegyzo') {
       if (plan.userId !== reqUser.id) return res.status(403).json({ error: 'Forbidden' });
