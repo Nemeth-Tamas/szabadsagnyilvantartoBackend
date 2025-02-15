@@ -8,6 +8,7 @@
     "dev": "nodemon -r tsconfig-paths/register src/index.ts",
     "db:seed": "ts-node  prisma/seed.ts",
     "db:migrate": "npx prisma migrate deploy",
+    "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio",
     "db:generate": "npx prisma generate"
   },

@@ -30,6 +30,7 @@ model User {
   User User[] @relation("Manager")
   Szabadsag Szabadsag[] @relation("UserRelation")
   Tappenz Tappenz[]
+  Kerelem Kerelem[]
 }
 
 model Szabadsag {
@@ -41,6 +42,7 @@ model Szabadsag {
   managerId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Kerelem Kerelem[]
 }
 
 model Tappenz {
@@ -50,6 +52,25 @@ model Tappenz {
   startDate DateTime
   endDate   DateTime?
   managerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Kerelem {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  type      String
+  dates     DateTime[]
+  managerId String
+  managerName String
+  approved  Boolean  @default(false)
+  rejected  Boolean  @default(false)
+  rejectedMessage String?
+  szabadsagId String?
+  szabadsag Szabadsag? @relation(fields: [szabadsagId], references: [id])
+  submittingName String
+  submittingEmailIdentifier String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

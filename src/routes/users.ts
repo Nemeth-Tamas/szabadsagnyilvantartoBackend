@@ -187,4 +187,40 @@ router.patch("/user/:id", authenticateToken, authorizeRole("admin"), async (req:
   }
 });
 
+router.delete("/user/:id", authenticateToken, authorizeRole("admin"), async (req: Request, res: Response): Promise<any> => {
+  let reqUser = req.user;
+
+  if (!reqUser) return res.status(401).json({ error: 'User Object Not Found' });
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: {
+        id: req.params.id
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.email.endsWith(reqUser.email.split('@')[1])) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // TODO: Delete all requests of the user
+    // TODO: Delete all szabadsagok of the user
+    // TODO: Delete all plans of the user
+    // TODO: Delete all tappenzek of the user
+
+    await prisma.user.delete({
+      where: {
+        id: req.params.id
+      }
+    });
+
+    res.json({ message: 'User deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
