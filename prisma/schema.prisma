@@ -32,6 +32,7 @@ model User {
   Tappenz Tappenz[]
   Kerelem Kerelem[]
   Uzenetek Uzenetek[]
+  Plan Plan?
 }
 
 model Szabadsag {
@@ -83,6 +84,17 @@ model Uzenetek {
   message   String
   date      DateTime
   sendingName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  filledOut Boolean  @default(false)
+  dates     DateTime[]
+  managerId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

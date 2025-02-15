@@ -5,6 +5,8 @@ import usersRoutes from './routes/users';
 import requestsRoutes from './routes/requests';
 import messagesRoutes from './routes/messages';
 import leavesRoutes from './routes/leaves';
+import tappenzRoutes from './routes/sickleaves';
+import plansRoutes from './routes/plans';
 
 dotenv.config();
 
@@ -16,10 +18,8 @@ app.use(usersRoutes);
 app.use(requestsRoutes);
 app.use(messagesRoutes);
 app.use(leavesRoutes);
-
-// app.get("/", (req: Request, res: Response) => {
-//   res.send("Express + TypeScript Server");
-// });
+app.use(tappenzRoutes);
+app.use(plansRoutes);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

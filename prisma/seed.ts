@@ -18,6 +18,15 @@ async function main() {
     }
   });
 
+  await prisma.user.update({
+    where: {
+      id: demoAdmin.id
+    },
+    data: {
+      managerId: demoAdmin.id
+    }
+  })
+
   const demoManager = await prisma.user.upsert({
     where: {
       email: "demomanager@celldomolk.hivatal"
