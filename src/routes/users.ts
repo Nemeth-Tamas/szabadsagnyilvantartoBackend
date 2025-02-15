@@ -87,12 +87,19 @@ router.get("/users", authenticateToken, authorizeRole('irodavezeto'), async (req
   try {
     let usersList: User[] = [];
     if (reqUser.role === 'jegyzo' || reqUser.role === 'admin') {
-      usersList = await prisma.user.findMany({});
+      usersList = await prisma.user.findMany({
+        orderBy: {
+          name: 'asc'
+        }
+      });
     } else if (reqUser.role === 'irodavezeto') {
       usersList = await prisma.user.findMany({
         where: {
           managerId: reqUser.id
-        }
+        },
+        orderBy: {
+          name: 'asc'
+        },
       });
     }
 

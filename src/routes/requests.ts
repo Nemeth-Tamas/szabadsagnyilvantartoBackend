@@ -82,6 +82,9 @@ router.get("/requests/own", authenticateToken, authorizeRole("felhasznalo"), asy
       where: {
         userId: user.id
       },
+      orderBy: {
+        createdAt: 'desc'
+      },
       skip: Number(offset),
       take: Number(limit)
     });
@@ -326,6 +329,9 @@ router.get("/requests", authenticateToken, authorizeRole("irodavezeto"), async (
         where: {
           managerId: user.id
         },
+        orderBy: {
+          createdAt: 'desc'
+        },
         skip: Number(offset),
         take: Number(limit)
       });
@@ -335,6 +341,9 @@ router.get("/requests", authenticateToken, authorizeRole("irodavezeto"), async (
       requests = await prisma.kerelem.findMany({
         where: {
           submittingEmailIdentifier: user.email.split('@')[1]
+        },
+        orderBy: {
+          createdAt: 'desc'
         },
         skip: Number(offset),
         take: Number(limit)
