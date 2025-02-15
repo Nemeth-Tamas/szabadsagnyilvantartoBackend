@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import usersRoutes from './routes/users';
 import requestsRoutes from './routes/requests';
 import messagesRoutes from './routes/messages';
+import leavesRoutes from './routes/leaves';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(usersRoutes);
 app.use(requestsRoutes);
 app.use(messagesRoutes);
+app.use(leavesRoutes);
 
 // app.get("/", (req: Request, res: Response) => {
 //   res.send("Express + TypeScript Server");
