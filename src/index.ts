@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 
 import usersRoutes from './routes/users';
@@ -15,8 +15,15 @@ dotenv.config();
 const app: Express = express();
 const port = parseInt(process.env.PORT || "9999", 10);
 
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN, // Update to match your frontend's origin
+const corsOptions: CorsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [];
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 };
 
