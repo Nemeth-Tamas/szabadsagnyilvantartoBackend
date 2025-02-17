@@ -23,8 +23,8 @@ model User {
   maxDays Int @default(0)
   sick    Boolean  @default(false)
   onLeave Boolean  @default(false)
-  manager   User?    @relation("Manager", fields: [managerId], references: [id])
-  managerId String?
+  manager   User    @relation("Manager", fields: [managerId], references: [id])
+  managerId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   User User[] @relation("Manager")

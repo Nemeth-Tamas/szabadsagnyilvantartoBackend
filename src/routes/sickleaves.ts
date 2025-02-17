@@ -118,7 +118,7 @@ router.delete("/tappenz/:id", authenticateToken, authorizeRole('admin'), async (
   }
 });
 
-router.get("/tappenz/cumulative/:userId", authenticateToken, authorizeRole('admin'), async (req: Request, res: Response): Promise<any> => {
+router.get("/tappenz/cumulative/:userId", authenticateToken, authorizeRole('irodavezeto'), async (req: Request, res: Response): Promise<any> => {
   let reqUser = req.user;
 
   if (!reqUser) return res.status(401).json({ error: 'Unauthorized' });
@@ -149,7 +149,7 @@ router.get("/tappenz/cumulative/:userId", authenticateToken, authorizeRole('admi
   }
 });
 
-router.get("/tappenz/current/:userId", authenticateToken, authorizeRole('admin'), async (req: Request, res: Response): Promise<any> => {
+router.get("/tappenz/current/:userId", authenticateToken, authorizeRole('felhasznalo'), async (req: Request, res: Response): Promise<any> => {
   let reqUser = req.user;
 
   if (!reqUser) return res.status(401).json({ error: 'Unauthorized' });
@@ -180,7 +180,7 @@ router.get("/tappenz/current/:userId", authenticateToken, authorizeRole('admin')
   }
 });
 
-router.get("/tappenz/:userId", authenticateToken, authorizeRole('admin'), async (req: Request, res: Response): Promise<any> => {
+router.get("/tappenz/:userId", authenticateToken, authorizeRole('irodavezeto'), async (req: Request, res: Response): Promise<any> => {
   let reqUser = req.user;
 
   if (!reqUser) return res.status(401).json({ error: 'Unauthorized' });

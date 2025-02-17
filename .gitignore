@@ -16,6 +16,7 @@ yarn-error.log*
 
 # Prisma
 prisma/dev.db
+privateseed.ts
 
 # Build
 dist/

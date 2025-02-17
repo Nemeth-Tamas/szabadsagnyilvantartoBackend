@@ -141,7 +141,11 @@ router.post("/logout", async (req: Request, res: Response): Promise<any> => {
 
     res.clearCookie('refreshToken');
     res.json({ message: 'Logged out' });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      res.clearCookie('refreshToken');
+      return res.json({ message: 'Logged out' });
+    }
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
