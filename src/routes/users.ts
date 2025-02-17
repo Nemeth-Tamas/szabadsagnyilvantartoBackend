@@ -48,6 +48,20 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
       email: user.email
     }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+    const storedToken = await prisma.refreshToken.findMany({
+      where: {
+        userId: user.id
+      }
+    });
+
+    if (storedToken.length > 0) {
+      await prisma.refreshToken.deleteMany({
+        where: {
+          userId: user.id
+        }
+      });
+    }
+
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
@@ -99,25 +113,21 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
       managerId: user.managerId
     }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    const currentTime = Math.floor(Date.now() / 1000);
-    const oneDayInSeconds = 24 * 60 * 60;
-    if (decoded.exp - currentTime < oneDayInSeconds) {
-      const newRefreshToken = jwt.sign({
-        id: user.id,
-        email: user.email
-      }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const newRefreshToken = jwt.sign({
+      id: user.id,
+      email: user.email
+    }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-      await prisma.refreshToken.update({
-        where: {
-          token: refreshToken
-        },
-        data: {
-          token: newRefreshToken
-        }
-      });
+    await prisma.refreshToken.update({
+      where: {
+        token: refreshToken
+      },
+      data: {
+        token: newRefreshToken
+      }
+    });
 
-      res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
-    }
+    res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
 
     res.json({ accessToken });
   }
@@ -133,6 +143,12 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
       });
       return res.status(401).json({ error: 'Refresh token expired' });
     }
+
+    await prisma.refreshToken.delete({
+      where: {
+        token: refreshToken
+      }
+    });
 
     res.status(500).json({ error: 'Internal server error' });
   }
