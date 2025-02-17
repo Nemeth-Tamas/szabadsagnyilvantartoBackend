@@ -1,8 +1,8 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import prisma from '@/lib/db';
-import { authenticateToken, authorizeRole } from '@/lib/middleware';
-import { resetPlanById } from '@/utils/plan';
+import prisma from '../lib/db';
+import { authenticateToken, authorizeRole } from '../lib/middleware';
+import { resetPlanById } from '../utils/plan';
 import * as xlsx from 'xlsx';
 
 const router = express.Router();

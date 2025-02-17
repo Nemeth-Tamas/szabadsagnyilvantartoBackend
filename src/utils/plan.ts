@@ -1,4 +1,4 @@
-import prisma from "@/lib/db";
+import prisma from "../lib/db";
 import { Plan } from "@prisma/client";
 
 export const resetPlanById = async (userId: string): Promise<Plan | Error> => {

@@ -1,8 +1,8 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import prisma from '@/lib/db';
-import { authenticateToken, authorizeRole } from '@/lib/middleware';
-import { checkManagerAndSendEmail } from '@/utils/requests';
+import prisma from '../lib/db';
+import { authenticateToken, authorizeRole } from '../lib/middleware';
+import { checkManagerAndSendEmail } from '../utils/requests';
 
 const router = express.Router();
 

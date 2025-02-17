@@ -1,7 +1,7 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import prisma from '@/lib/db';
-import { authenticateToken, authorizeRole } from '@/lib/middleware';
+import prisma from '../lib/db';
+import { authenticateToken, authorizeRole } from '../lib/middleware';
 
 const router = express.Router();
 
