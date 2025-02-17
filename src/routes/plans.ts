@@ -185,4 +185,82 @@ router.delete("/plans/:userId", authenticateToken, authorizeRole('admin'), async
   }
 });
 
+router.post("/plans/:userId", authenticateToken, async (req: Request, res: Response): Promise<any> => {
+  let reqUser = req.user;
+  let { userId } = req.params;
+  let { dates } = req.body;
+
+  if (!dates) return res.status(400).json({ error: 'Missing required fields' });
+
+  dates = dates.map((date: string) => new Date(date));
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    if (user.maxDays === 0) {
+      return res.status(200).json({ status: "error", errorCode: "noDaysSet" });
+    }
+
+    if (dates.length === 0) {
+      return res.status(200).json({ status: "error", errorCode: "emptyPlan" });
+    }
+
+    if (user.maxDays > dates.length) {
+      return res.status(200).json({ status: "error", errorCode: "notAllDaysUsed" });
+    }
+
+    if (user.maxDays < dates.length) {
+      return res.status(200).json({ status: "error", errorCode: "tooManyDaysUsed" });
+    }
+
+    let plan = await prisma.plan.findFirst({
+      where: {
+        userId: userId
+      }
+    });
+
+    if (!plan) {
+      let user = await prisma.user.findUnique({
+        where: {
+          id: userId
+        }
+      });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      let newPlan = await prisma.plan.create({
+        data: {
+          userId: user.id,
+          managerId: user.managerId || user.id,
+          dates: dates,
+          filledOut: true
+        }
+      });
+      plan = newPlan;
+    } else {
+      let planId = plan.id;
+      let planDoc = await prisma.plan.update({
+        where: {
+          id: planId
+        },
+        data: {
+          dates: dates,
+          filledOut: true
+        }
+      });
+      plan = planDoc;
+    }
+
+    res.json(plan);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 export default router;

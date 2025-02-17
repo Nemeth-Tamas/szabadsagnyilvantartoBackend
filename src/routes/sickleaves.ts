@@ -133,8 +133,6 @@ router.get("/tappenz/cumulative/:userId", authenticateToken, authorizeRole('admi
       }
     });
 
-    console.log(tappenz);
-
     let cumulative = 0;
 
     for (const element of tappenz) {

@@ -71,7 +71,7 @@ model Kerelem {
   rejected  Boolean  @default(false)
   rejectedMessage String?
   szabadsagId String?
-  szabadsag Szabadsag? @relation(fields: [szabadsagId], references: [id])
+  szabadsag Szabadsag? @relation(fields: [szabadsagId], references: [id], onDelete: SetNull)
   submittingName String
   submittingEmailIdentifier String
   createdAt DateTime @default(now())

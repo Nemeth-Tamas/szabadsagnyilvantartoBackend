@@ -35,8 +35,6 @@ router.post("/requests", authenticateToken, async (req: Request, res: Response):
     if (!manager) return res.status(404).json({ error: 'Manager not found' });
 
     if (managerId !== user.managerId) {
-      console.log('managerId', managerId);
-      console.log('user.managerId', user.managerId);
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -57,6 +55,38 @@ router.post("/requests", authenticateToken, async (req: Request, res: Response):
     checkManagerAndSendEmail(manager, user, dates);
 
     res.json(newRequest);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get("/requests/toapprove", authenticateToken, authorizeRole("irodavezeto"), async (req: Request, res: Response): Promise<any> => {
+  let reqUser = req.user;
+
+  if (!reqUser) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: {
+        id: reqUser.id
+      }
+    });
+
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    let requests = await prisma.kerelem.findMany({
+      where: {
+        managerId: user.id,
+        approved: false,
+        rejected: false
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(requests.length);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

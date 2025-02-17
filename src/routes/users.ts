@@ -64,8 +64,6 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
 });
 
 router.post("/refresh-token", async (req: Request, res: Response): Promise<any> => {
-  console.log("Called at: ", new Date().toISOString());
-  
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) return res.status(401).json({ error: 'Unauthorized' });
@@ -167,8 +165,8 @@ router.post("/register", authenticateToken, authorizeRole('admin'), async (req: 
         name,
         password: bcrypt.hashSync(password, 10),
         role,
-        maxDays,
-        remainingDays,
+        maxDays: parseInt(maxDays) || 0,
+        remainingDays: parseInt(remainingDays) || 0,
         managerId
       }
     });
@@ -283,8 +281,8 @@ router.patch("/user/:id", authenticateToken, authorizeRole("admin"), async (req:
         name: name || user.name,
         email: email || user.email,
         role: role || user.role,
-        maxDays: maxDays || user.maxDays,
-        remainingDays: remainingDays || user.remainingDays,
+        maxDays: parseInt(maxDays) || user.maxDays,
+        remainingDays: parseInt(remainingDays) || user.remainingDays,
         managerId: managerId || user.managerId,
         password: password || user.password
       }
@@ -315,10 +313,48 @@ router.delete("/user/:id", authenticateToken, authorizeRole("admin"), async (req
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
-    // TODO: Delete all requests of the user
-    // TODO: Delete all szabadsagok of the user
-    // TODO: Delete all plans of the user
-    // TODO: Delete all tappenzek of the user
+    try {
+      await prisma.szabadsag.deleteMany({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
+    try {
+      await prisma.kerelem.deleteMany({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
+    try {
+      await prisma.plan.delete({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
+    try {
+      await prisma.tappenz.deleteMany({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
+    try {
+      await prisma.uzenetek.deleteMany({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
+    try {
+      await prisma.refreshToken.deleteMany({
+        where: {
+          userId: req.params.id
+        }
+      });
+    } catch (error) {}
 
     await prisma.user.delete({
       where: {
