@@ -16,7 +16,7 @@ const app: Express = express();
 const port = parseInt(process.env.PORT || "9999", 10);
 
 const corsOptions = {
-  origin: 'http://192.168.1.2:5173', // Update to match your frontend's origin
+  origin: process.env.CORS_ORIGIN, // Update to match your frontend's origin
   credentials: true,
 };
 
