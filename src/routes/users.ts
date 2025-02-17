@@ -121,8 +121,19 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
 
     res.json({ accessToken });
   }
-  catch (error) {
+  catch (error: any) {
     console.error(error);
+
+    if (error.name === 'TokenExpiredError') {
+      res.clearCookie('refreshToken');
+      await prisma.refreshToken.delete({
+        where: {
+          token: refreshToken
+        }
+      });
+      return res.status(401).json({ error: 'Refresh token expired' });
+    }
+
     res.status(500).json({ error: 'Internal server error' });
   }
 });
