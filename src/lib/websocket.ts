@@ -2,6 +2,9 @@ import WebSocket, { Server } from 'ws';
 import jwt from 'jsonwebtoken';
 import prisma from './db';
 import type http from 'http';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 interface ConnectedUsers {
   [key: string]: WebSocket;
