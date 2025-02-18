@@ -2,6 +2,11 @@ import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
+import http from 'http';
+import { setupWebSocket } from './lib/websocket';
+import winston from 'winston';
+import expressWinston from 'express-winston';
+import 'winston-daily-rotate-file';
 
 import usersRoutes from './routes/users';
 import requestsRoutes from './routes/requests';
@@ -31,6 +36,34 @@ const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+const transport = new winston.transports.DailyRotateFile({
+  filename: 'logs/sznyb-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+});
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json(),
+  ),
+  transports: [
+    transport,
+  ],
+});
+
+app.use(expressWinston.logger({
+  winstonInstance: logger,
+  meta: true,
+  msg: "HTTP {{req.method}} {{req.url}}",
+  expressFormat: true,
+  colorize: false,
+}))
+
 app.use(usersRoutes);
 app.use(requestsRoutes);
 app.use(messagesRoutes);
@@ -38,6 +71,9 @@ app.use(leavesRoutes);
 app.use(tappenzRoutes);
 app.use(plansRoutes);
 
-app.listen(port, '0.0.0.0', () => {
+const server = http.createServer(app);
+setupWebSocket(server);
+
+server.listen(port, '0.0.0.0', () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

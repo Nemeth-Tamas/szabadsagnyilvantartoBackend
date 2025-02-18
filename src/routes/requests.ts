@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/db';
 import { authenticateToken, authorizeRole } from '../lib/middleware';
 import { checkManagerAndSendEmail } from '../utils/requests';
+import { notifyUserRequestCount } from '../lib/websocket';
 
 const router = express.Router();
 
@@ -53,6 +54,8 @@ router.post("/requests", authenticateToken, async (req: Request, res: Response):
     });
 
     checkManagerAndSendEmail(manager, user, dates);
+
+    notifyUserRequestCount(manager.id);
 
     res.json(newRequest);
   } catch (error) {
@@ -187,6 +190,8 @@ router.patch("/requests/:id/approve", authenticateToken, authorizeRole("irodavez
       }
     })
 
+    notifyUserRequestCount(request.managerId);
+
     res.json(updatedRequest);
   } catch (error) {
     console.error(error);
@@ -234,6 +239,8 @@ router.patch("/requests/:id/reject", authenticateToken, authorizeRole("irodaveze
         rejectedMessage: reason
       }
     });
+
+    notifyUserRequestCount(request.managerId);
 
     res.json(updatedRequest);
   } catch (error) {
@@ -295,6 +302,8 @@ router.delete("/requests/:id", authenticateToken, authorizeRole("felhasznalo"), 
         id: id
       }
     });
+
+    notifyUserRequestCount(request.managerId);
 
     res.json(deletedRequest);
   } catch (error) {
