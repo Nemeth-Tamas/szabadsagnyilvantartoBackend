@@ -135,12 +135,14 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
           }
         });
       } catch (error) {}
-      await prisma.refreshToken.create({
-        data: {
-          token: newRefreshToken,
-          userId: user.id
-        }
-      });
+      try {
+        await prisma.refreshToken.create({
+          data: {
+            token: newRefreshToken,
+            userId: user.id
+          }
+        });
+      } catch (error) {}
     }
 
     res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
