@@ -118,14 +118,30 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
       email: user.email
     }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    await prisma.refreshToken.update({
-      where: {
-        token: refreshToken
-      },
-      data: {
-        token: newRefreshToken
-      }
-    });
+    try {
+      await prisma.refreshToken.update({
+        where: {
+          token: refreshToken
+        },
+        data: {
+          token: newRefreshToken
+        }
+      });
+    } catch (error) {
+      try {
+        await prisma.refreshToken.deleteMany({
+          where: {
+            userId: user.id
+          }
+        });
+      } catch (error) {}
+      await prisma.refreshToken.create({
+        data: {
+          token: newRefreshToken,
+          userId: user.id
+        }
+      });
+    }
 
     res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
 
@@ -136,19 +152,23 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
 
     if (error.name === 'TokenExpiredError') {
       res.clearCookie('refreshToken');
+      try {
+        await prisma.refreshToken.delete({
+          where: {
+            token: refreshToken
+          }
+        });
+      } catch (error) {}
+      return res.status(401).json({ error: 'Refresh token expired' });
+    }
+
+    try {
       await prisma.refreshToken.delete({
         where: {
           token: refreshToken
         }
       });
-      return res.status(401).json({ error: 'Refresh token expired' });
-    }
-
-    await prisma.refreshToken.delete({
-      where: {
-        token: refreshToken
-      }
-    });
+    } catch (error) {}
 
     res.status(500).json({ error: 'Internal server error' });
   }
