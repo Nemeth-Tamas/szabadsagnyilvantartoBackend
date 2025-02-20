@@ -31,7 +31,10 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
-    if (!process.env.JWT_SECRET) process.exit("JWT_SECRET not set");
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET not set");
+      return res.status(500).json({ error: 'Internal server error' });
+    }
 
     const accessToken = jwt.sign({
       id: user.id,
@@ -77,77 +80,116 @@ router.post("/login", async (req: Request, res: Response): Promise<any> => {
   }
 });
 
+const locks = new Map<string, Promise<void>>();
+
 router.post("/refresh-token", async (req: Request, res: Response): Promise<any> => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) return res.status(401).json({ error: 'Unauthorized' });
+  if (!refreshToken) {
+    console.log("No refresh token provided");
+    return res.status(401).json({ error: 'Unauthorized' })
+  };
 
   try {
-    if (!process.env.JWT_SECRET) process.exit("JWT_SECRET not set");
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET not set");
+      return res.status(500).json({ error: 'Internal server error' });
+    }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as { id: string, email: string, exp: number };
 
-    const storedToken = await prisma.refreshToken.findUnique({
-      where: {
-        token: refreshToken
+    console.log('Decoded token:', decoded);
+
+    const lock = locks.get(decoded.id) || Promise.resolve();
+    locks.set(decoded.id, lock.then(async () => {
+      if (!process.env.JWT_SECRET) {
+        console.error("JWT_SECRET not set");
+        res.status(500).json({ error: 'Internal server error' });
+        return;
       }
-    });
 
-    if (!storedToken) return res.status(401).json({ error: 'Invalid refresh token' });
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: decoded.id
-      }
-    });
-
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const accessToken = jwt.sign({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      maxDays: user.maxDays,
-      remainingDays: user.remainingDays,
-      managerId: user.managerId
-    }, process.env.JWT_SECRET, { expiresIn: '15m' });
-
-    const newRefreshToken = jwt.sign({
-      id: user.id,
-      email: user.email
-    }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    try {
-      await prisma.refreshToken.update({
+      const storedToken = await prisma.refreshToken.findUnique({
         where: {
           token: refreshToken
-        },
-        data: {
-          token: newRefreshToken
         }
       });
-    } catch (error) {
+  
+      if (!storedToken) {
+        console.log('Refresh token not found in database');
+        res.status(401).json({ error: 'Invalid refresh token' });
+        return;
+      };
+  
+      const user = await prisma.user.findUnique({
+        where: {
+          id: decoded.id
+        }
+      });
+  
+      if (!user) {
+        console.log('User not found');
+        res.status(404).json({ error: 'User not found' });
+        return;
+      };
+  
+      const accessToken = jwt.sign({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        maxDays: user.maxDays,
+        remainingDays: user.remainingDays,
+        managerId: user.managerId
+      }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  
+      const newRefreshToken = jwt.sign({
+        id: user.id,
+        email: user.email
+      }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  
       try {
-        await prisma.refreshToken.deleteMany({
+        await prisma.refreshToken.update({
           where: {
-            userId: user.id
-          }
-        });
-      } catch (error) {}
-      try {
-        await prisma.refreshToken.create({
+            token: refreshToken
+          },
           data: {
-            token: newRefreshToken,
-            userId: user.id
+            token: newRefreshToken
           }
         });
-      } catch (error) {}
-    }
+        console.log('Refresh token updated');
+      } catch (error) {
+        console.log('Error updating refresh token:', error);
+        try {
+          await prisma.refreshToken.deleteMany({
+            where: {
+              userId: user.id
+            }
+          });
+          console.log('Deleted old refresh tokens');
+        } catch (error) {
+          console.log('Error deleting old refresh tokens:', error);
+        }
+        try {
+          await prisma.refreshToken.create({
+            data: {
+              token: newRefreshToken,
+              userId: user.id
+            }
+          });
+          console.log('Created new refresh token');
+        } catch (error) {
+          console.log('Error creating new refresh token:', error);
+        }
+      }
+  
+      res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
+      res.json({ accessToken });
+      return;
+    }).finally(() => {
+      locks.delete(decoded.id);
+    }));
 
-    res.cookie('refreshToken', newRefreshToken, {httpOnly: true });
-
-    res.json({ accessToken });
+    await locks.get(decoded.id);
   }
   catch (error: any) {
     console.error(error);
@@ -160,7 +202,10 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
             token: refreshToken
           }
         });
-      } catch (error) {}
+        console.log('Expired refresh token deleted');
+      } catch (error) {
+        console.log('Error deleting expired refresh token:', error);
+      }
       return res.status(401).json({ error: 'Refresh token expired' });
     }
 
@@ -170,7 +215,10 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
           token: refreshToken
         }
       });
-    } catch (error) {}
+      console.log('Invalid refresh token deleted');
+    } catch (error) {
+      console.log('Error deleting invalid refresh token:', error);
+    }
 
     res.status(500).json({ error: 'Internal server error' });
   }

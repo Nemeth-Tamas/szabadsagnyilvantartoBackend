@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/db';
 import { authenticateToken, authorizeRole } from '../lib/middleware';
 import { checkManagerAndSendEmail } from '../utils/requests';
-import { notifyUserRequestCount } from '../lib/websocket';
+import { notifyUserRequestCount, sendMessageToUser } from '../lib/websocket';
 
 const router = express.Router();
 
@@ -56,6 +56,7 @@ router.post("/requests", authenticateToken, async (req: Request, res: Response):
     checkManagerAndSendEmail(manager, user, dates);
 
     notifyUserRequestCount(manager.id);
+    sendMessageToUser(manager.id, { type: "kerelmek_new_notification", message: reqUser.name })
 
     res.json(newRequest);
   } catch (error) {
