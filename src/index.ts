@@ -62,7 +62,7 @@ app.use(expressWinston.logger({
   msg: "HTTP {{req.method}} {{req.url}}",
   expressFormat: true,
   colorize: false,
-}))
+}));
 
 app.use(usersRoutes);
 app.use(requestsRoutes);
