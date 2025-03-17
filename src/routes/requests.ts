@@ -180,16 +180,18 @@ router.patch("/requests/:id/approve", authenticateToken, authorizeRole("irodavez
       }
     });
 
-    await prisma.user.update({
+    if (szabadsag.type === "SZ") {
+      await prisma.user.update({
       where: {
-        id: request.userId
-      },
-      data: {
-        remainingDays: {
-          decrement: request.dates.length
+          id: request.userId
+        },
+        data: {
+          remainingDays: {
+            decrement: request.dates.length
+          }
         }
-      }
-    })
+      })
+    }
 
     notifyUserRequestCount(request.managerId);
 
@@ -286,16 +288,18 @@ router.delete("/requests/:id", authenticateToken, authorizeRole("felhasznalo"), 
         }
       });
 
-      await prisma.user.update({
-        where: {
-          id: request.userId
-        },
-        data: {
-          remainingDays: {
-            increment: request.dates.length
+      if (deletedSzabadsag.type === "SZ") {
+        await prisma.user.update({
+          where: {
+            id: request.userId
+          },
+          data: {
+            remainingDays: {
+              increment: request.dates.length
+            }
           }
-        }
-      });
+        });
+      }
     }
 
     let deletedRequest = await prisma.kerelem.delete({
