@@ -27,7 +27,8 @@ const verifyToken = (token: string): Promise<{id: string}> => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
       if (err) {
-        return reject(new TokenError('Invalid token'));
+        // Preserve the original JWT error for better error handling
+        return reject(err);
       }
       resolve(decoded as { id: string });
     });
@@ -105,9 +106,28 @@ export const setupWebSocket = (server: http.Server) => {
       });
 
       await notifyUserRequestCount(userId);
-    } catch (error) {
-      console.error('Connection error:', error);
-      ws.close(1008, error instanceof Error ? error.message : 'Connection error');
+    } catch (error: any) {
+      // Handle token expiration gracefully - this is expected behavior
+      if (error?.name === 'TokenExpiredError') {
+        // Log at debug level only - token expiration is normal when users are inactive
+        console.log('WebSocket connection rejected: token expired');
+        ws.close(1008, 'Token expired');
+      }
+      // Handle invalid tokens (malformed, wrong signature, etc.)
+      else if (error?.name === 'JsonWebTokenError') {
+        console.log('WebSocket connection rejected: invalid token');
+        ws.close(1008, 'Invalid token');
+      }
+      // Handle missing token
+      else if (error?.message === 'Token missing') {
+        console.log('WebSocket connection rejected: no token provided');
+        ws.close(1008, 'Authentication required');
+      }
+      // Log unexpected errors at error level
+      else {
+        console.error('WebSocket connection error:', error);
+        ws.close(1008, error instanceof Error ? error.message : 'Connection error');
+      }
     }
   });
 }

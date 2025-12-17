@@ -86,7 +86,7 @@ router.post("/refresh-token", async (req: Request, res: Response): Promise<any> 
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
-    console.log("No refresh token provided");
+    // This is expected when cookies expire, are cleared, or in incognito mode
     return res.status(401).json({ error: 'Unauthorized' })
   };
 

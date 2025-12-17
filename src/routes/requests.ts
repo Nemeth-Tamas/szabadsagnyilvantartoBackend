@@ -159,7 +159,16 @@ router.patch("/requests/:id/approve", authenticateToken, authorizeRole("irodavez
 
     if (request.approved || request.rejected) return res.status(400).json({ error: 'Request already approved or rejected' });
 
-    if (user.remainingDays < request.dates.length) return res.status(403).json({ error: 'User does not have anough days' });
+    // Fetch the requesting user to check their remaining days
+    let requestingUser = await prisma.user.findUnique({
+      where: {
+        id: request.userId
+      }
+    });
+
+    if (!requestingUser) return res.status(404).json({ error: 'Requesting user not found' });
+
+    if (requestingUser.remainingDays < request.dates.length) return res.status(403).json({ error: 'User does not have enough days' });
 
     let szabadsag = await prisma.szabadsag.create({
       data: {
